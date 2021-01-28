@@ -15,7 +15,7 @@
         android:visibility="gone"
         android:src="@drawable/app_icon_your_company" />
 
-    <com.google.android.exoplayer2.ui.PlayerView
+    <com.waynetoo.videotv.player.SimplePlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

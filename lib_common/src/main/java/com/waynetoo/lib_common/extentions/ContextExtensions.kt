@@ -1,4 +1,4 @@
-package com.waynetoo.videotv
+package com.waynetoo.lib_common.extentions
 
 import android.content.Context
 import android.widget.Toast

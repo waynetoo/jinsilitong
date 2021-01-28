@@ -1,4 +1,4 @@
-package com.waynetoo.videotv
+package com.waynetoo.videotv.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context

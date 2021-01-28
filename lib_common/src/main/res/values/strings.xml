@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="timeout_connection">网络连接超时</string>
+    <string name="error_connection">网络未连接</string>
+    <string name="error_network">网络异常</string>
+    <string name="check_network_is_connected">请检查网络是否畅通</string>
+    <string name="camera_tips">请允许访问您的摄像头和存储空间</string>
+    <string name="wait">请稍等</string>
+
+    <string name="btn_save">保存</string>
+    <string name="btn_confirm">确定</string>
+    <string name="btn_cancel">取消</string>
+    <string name="copy">复制</string>
+</resources>

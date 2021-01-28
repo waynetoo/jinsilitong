@@ -4,7 +4,6 @@
     package="com.waynetoo.videotv"
     android:installLocation="internalOnly"
     tools:ignore="MissingLeanbackLauncher">
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
@@ -13,6 +12,11 @@
         android:required="true" />
     <!-- .接收启动完成的广播权限 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -23,7 +27,7 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
         <receiver
-            android:name=".BootReceiver"
+            android:name=".receiver.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="1000">
@@ -33,7 +37,7 @@
         </receiver>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:banner="@drawable/app_icon_your_company"
             android:icon="@drawable/app_icon_your_company"
             android:label="@string/app_name"
@@ -48,6 +52,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Mqtt Service -->
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
+        <service android:name=".mqtt.MyMqttService" />
     </application>
 
 </manifest>

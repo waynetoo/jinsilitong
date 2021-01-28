@@ -1,4 +1,4 @@
-package com.waynetoo.videotv
+package com.waynetoo.videotv.model
 
 object MovieList {
     val MOVIE_CATEGORY = arrayOf(
@@ -55,12 +55,13 @@ object MovieList {
 
         val list = title.indices.map {
             buildMovieInfo(
-                    title[it],
-                    description,
-                    studio[it],
-                    videoUrl[it],
-                    cardImageUrl[it],
-                    bgImageUrl[it])
+                title[it],
+                description,
+                studio[it],
+                videoUrl[it],
+                cardImageUrl[it],
+                bgImageUrl[it]
+            )
         }
 
         return list

@@ -1,4 +1,4 @@
-package com.waynetoo.videotv
+package com.waynetoo.videotv.model
 
 import java.io.Serializable
 
