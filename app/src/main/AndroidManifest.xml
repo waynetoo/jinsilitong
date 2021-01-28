@@ -38,6 +38,11 @@
 
         <activity
             android:name=".ui.MainActivity"
+            android:screenOrientation="landscape"
+            android:launchMode="singleTask">
+        </activity>
+        <activity
+            android:name=".ui.InitActivity"
             android:banner="@drawable/app_icon_your_company"
             android:icon="@drawable/app_icon_your_company"
             android:label="@string/app_name"

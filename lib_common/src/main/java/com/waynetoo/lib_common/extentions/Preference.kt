@@ -9,7 +9,7 @@ import kotlin.reflect.KProperty
  * on 2019/3/14
  */
 class Preference<T>(
-   context: Context, private val name: String, private val default: T, prefName: String = "CMSDefault"
+   context: Context, private val name: String, private val default: T, prefName: String = "PrefDefault"
 ) : ReadWriteProperty<Any?, T> {
 
     private val prefs by lazy {
