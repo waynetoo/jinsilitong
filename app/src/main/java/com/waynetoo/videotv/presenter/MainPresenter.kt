@@ -9,15 +9,18 @@ import com.waynetoo.videotv.ui.MainActivity
 /**
  */
 class MainPresenter : BasePresenter<MainActivity>() {
-    fun getTopicDetail(topicId: String) {
-        Service.client.getTopicDetail(topicId)
+    /**
+     * 获取广告
+     */
+    fun getAdList() {
+        Service.client.getAdVideos()
             .dispatchDefault()
             .commonSubscribe(
                 onSuccess = {
                     if (it == null) {
                         return@commonSubscribe
                     }
-                    view.getDetailSuccess(it)
+                    view.getAdListSuccess(it)
                 }, onFailure = {
                     view.toastError(it.msg)
                 },

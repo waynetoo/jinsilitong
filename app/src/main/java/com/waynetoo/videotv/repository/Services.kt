@@ -6,8 +6,10 @@ import com.waynetoo.lib_common.extentions.yes
 import com.waynetoo.lib_common.net.buildCommonClient
 import com.waynetoo.lib_common.net.builder
 import com.waynetoo.lib_common.net.handleUniformError
+import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.model.BaseModel
-import com.waynetoo.videotv.model.Topic
+import com.waynetoo.videotv.model.Store
+import com.waynetoo.videotv.room.entity.AdInfo
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
@@ -15,20 +17,17 @@ import okhttp3.Interceptor
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.http.*
 
-/**
- * Created by pwy on 2019-09-03.
- */
+const val SUCCESS_CODE = 100
 
-const val TOPIC_SUCCESS_CODE = 0
-const val TOPIC_TOKEN_EXPIRED = -1
-
-
-interface TopicApi {
+interface AdApi {
     /**
      * 选题详情
      */
-    @GET("topic/detail/{topicId}")
-    fun getTopicDetail(@Path("topicId") topicId: String): Observable<BaseModel<Topic>>
+    @GET("jeeplus/tobaccoAd/adVideos/get")
+    fun getAdVideos(): Observable<BaseModel<List<AdInfo>>>
+
+    @GET("jeeplus/tobacco/tobStore/get/{storeNo}")
+    fun bindStore(@Path("storeNo") storeNo: String): Observable<BaseModel<Store>>
 }
 
 /**
@@ -36,7 +35,7 @@ interface TopicApi {
  * 这两种情况下会重建client，刷新拦截器，添加新的header Authorization
  */
 object Service {
-    val BASE_URL = "https://ttopic.zijinshan.org/"
+    val BASE_URL = "http://39.99.150.10:9000/"
     val lazyMgr = resettableManager()
 
     private val retrofit by resettableLazy(lazyMgr) {
@@ -50,14 +49,14 @@ object Service {
             .build()
     }
 
-    val client: TopicApi by resettableLazy(lazyMgr) { retrofit.create(TopicApi::class.java) }
+    val client: AdApi by resettableLazy(lazyMgr) { retrofit.create(AdApi::class.java) }
 
     private val headerInterceptor by resettableLazy(lazyMgr) {
         Interceptor { chain ->
             val original = chain.request()
             val request = original.newBuilder()
                 .method(original.method, original.body)
-            val storeNo = ""
+            val storeNo = Constants.storeNo
             storeNo.isNotBlank().yes {
                 request.header(
                     "storeNo", storeNo
@@ -80,12 +79,9 @@ inline fun <T : Any> Observable<BaseModel<T>>.commonSubscribe(
         }
 
         override fun onNext(t: BaseModel<T>) {
-            when (t.status) {
-                TOPIC_SUCCESS_CODE -> {
+            when (t.code) {
+                SUCCESS_CODE -> {
                     onSuccess(t.data)
-                }
-                TOPIC_TOKEN_EXPIRED -> {  // token异常，跳转登录页面
-                    onFailure(t)
                 }
                 else -> {
                     onFailure(t)

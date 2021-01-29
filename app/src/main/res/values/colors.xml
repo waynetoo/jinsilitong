@@ -5,4 +5,31 @@
     <color name="search_opaque">#ffaa3f</color>
     <color name="selected_background">#ffaa3f</color>
     <color name="default_background">#3d3d3d</color>
+
+    <color name="white">#fff</color>
+    <color name="black">#000000</color>
+    <color name="text_hint">#CCCCD2</color>
+    <color name="divider">#F0F0F0</color>
+    <color name="bg_light_grey">#F9F9F9</color>
+    <color name="text_top">#4E4E4E</color>
+    <color name="text_primary">#666</color>
+    <color name="press">#20000000</color>
+
+    <color name="app_blue">#149EEF</color>
+    <color name="app_red">#FB4748</color>
+    <color name="bg_appbar">#F9F9F9</color>
+
+    <!-- 日历控件 -->
+    <color name="calendar_active_month_bg">#00000000</color>
+    <color name="calendar_bg">#ffffffff</color>
+    <color name="calendar_divider">#00000000</color>
+    <color name="calendar_inactive_month_bg">#00000000</color>
+    <color name="calendar_selected_day_bg">#ff379bff</color>
+    <color name="calendar_highlighted_day_bg">#ccffcc</color>
+    <color name="calendar_selected_range_bg">#ff96caff</color>
+    <color name="calendar_text_inactive">#40778088</color>
+    <color name="calendar_text_active">#ff3D3D3D</color>
+    <color name="calendar_text_selected">#ffffffff</color>
+    <color name="calendar_text_unselectable">#40778088</color>
+    <color name="calendar_text_highlighted">#ff778088</color>
 </resources>

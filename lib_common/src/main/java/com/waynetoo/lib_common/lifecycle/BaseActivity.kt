@@ -10,13 +10,17 @@ import android.widget.EditText
 import androidx.fragment.app.FragmentActivity
 import com.waynetoo.lib_common.component.TransparentDialog
 import com.waynetoo.lib_common.extentions.toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 /**
  * on 2019/3/13
  */
-abstract class BaseActivity<out P : BasePresenter<BaseActivity<P>>> : IMvpView<P>, FragmentActivity() {
+abstract class BaseActivity<out P : BasePresenter<BaseActivity<P>>> : IMvpView<P>,
+    FragmentActivity(), CoroutineScope by MainScope() {
     final override val presenter: P
 
     init {
@@ -64,13 +68,14 @@ abstract class BaseActivity<out P : BasePresenter<BaseActivity<P>>> : IMvpView<P
     override fun onDestroy() {
         presenter.onDestroy()
         super.onDestroy()
+        cancel()
     }
 
     open fun requestError(msg: String) {
         toast(msg)
     }
 
-    fun showProgressDialog(){
+    fun showProgressDialog() {
         pDialog.show(supportFragmentManager)
     }
 

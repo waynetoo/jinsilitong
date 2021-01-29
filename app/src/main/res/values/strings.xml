@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">金丝利通广告系统</string>
+
+    <!-- 登录 -->
+    <string name="login_tel">手机号码</string>
+    <string name="login_tel_hint">请输入门店Id</string>
+    <string name="store_id_number_illegal">请输入正确的门店Id</string>
+    <string name="login_pwd">密码</string>
+    <string name="login_pwd_hint">请输入密码</string>
+    <string name="login_vcode">验证码</string>
+    <string name="login_vcode_hint">请输入验证码</string>
+    <string name="login_with_code">验证码登录</string>
+    <string name="login_with_pwd">密码登录</string>
+    <string name="login_register">新用户注册</string>
+    <string name="resend_verify_code">重新获取{0}S</string>
 </resources>

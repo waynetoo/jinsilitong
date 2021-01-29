@@ -1,19 +1,24 @@
 package com.waynetoo.videotv.ui
 
 import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbManager
 import android.os.Bundle
 import com.google.android.exoplayer2.Player
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
-import com.waynetoo.videotv.model.Topic
 import com.waynetoo.videotv.mqtt.MyMqttService
 import com.waynetoo.videotv.presenter.MainPresenter
+import com.waynetoo.videotv.receiver.USBBroadcastReceiver
+import com.waynetoo.videotv.room.entity.AdInfo
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity<MainPresenter>() {
     private val TAG = "waynetoo"
     private var mIntent: Intent? = null
+    private var usbBroadcastReceiver: USBBroadcastReceiver? = null
+
     companion object {
         const val STREAM_URL = "http://vimg.zijinshan.org/portal/news/video/1554103229199.mp4"
     }
@@ -23,7 +28,15 @@ class MainActivity : BaseActivity<MainPresenter>() {
         setContentView(R.layout.activity_main)
         initVideoComponent()
         initMqtt()
-        presenter.getTopicDetail("1")
+        registerReceiver()
+    }
+
+    private fun registerReceiver() {
+        usbBroadcastReceiver = USBBroadcastReceiver()
+        val usbDeviceStateFilter = IntentFilter()
+        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+        registerReceiver(usbBroadcastReceiver, usbDeviceStateFilter)
     }
 
     private fun initMqtt() {
@@ -38,10 +51,8 @@ class MainActivity : BaseActivity<MainPresenter>() {
         playerView.setSource(STREAM_URL)
     }
 
-    fun getDetailSuccess(topic: Topic) {
-        topic.run {
-            println(this)
-        }
+    fun getAdListSuccess(remoteList: List<AdInfo>) {
+        println(this)
     }
 
     override fun onResume() {
@@ -61,15 +72,16 @@ class MainActivity : BaseActivity<MainPresenter>() {
                     } else if (state == Player.STATE_READY && !playWhenReady) {  // 暂停中
                     }
                 }
-            };
+            }
             onVideoStateReady = {
 
-            };
+            }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         stopService(mIntent)
+        unregisterReceiver(usbBroadcastReceiver)
     }
 }

@@ -3,24 +3,53 @@
     android:id="@+id/main_browse_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/lb_grey">
+    android:background="@color/white">
 
-    <EditText
-        android:id="@+id/et_store_no"
+    <LinearLayout
+        android:id="@+id/ll_binder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:background="@null"
-        android:ems="10"
-        android:hint="请输入门店ID"
-        android:inputType="number" />
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btn_sure"
+        <EditText
+            android:id="@+id/et_store_no"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:ems="12"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="请输入门店ID"
+            android:inputType="number"
+            android:padding="10dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/text_hint"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider" />
+
+        <Button
+            android:id="@+id/btn_sure"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:background="@drawable/bg_text_login_blue"
+            android:paddingTop="5sp"
+            android:paddingBottom="5sp"
+            android:text="确定"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/et_store_no"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:text="确定" />
+        android:layout_centerInParent="true"
+        android:textSize="32sp"></TextView>
 </RelativeLayout>

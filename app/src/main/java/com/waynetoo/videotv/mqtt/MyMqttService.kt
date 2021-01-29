@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.Nullable
+import com.waynetoo.videotv.config.Constants
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
@@ -24,9 +25,9 @@ class MyMqttService : Service() {
     var USERNAME = "admin" //用户名
     var PASSWORD = "password" //密码
 
-    @SuppressLint("MissingPermission")
-    var CLIENTID =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Build.getSerial() else Build.SERIAL //客户端ID，一般以客户端唯一标识符表示，这里用设备序列号表示
+
+    val CLIENTID = Constants.deviceId
+//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Build.getSerial() else Build.SERIAL //客户端ID，一般以客户端唯一标识符表示，这里用设备序列号表示
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         init()

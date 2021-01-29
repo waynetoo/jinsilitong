@@ -1,16 +1,24 @@
 package com.waynetoo.videotv.ui
 
 import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbManager
 import android.os.Bundle
+import android.view.View
+import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.otherwise
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.lib_common.extentions.yes
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
 import com.waynetoo.videotv.config.Constants
-import com.waynetoo.videotv.model.Topic
 import com.waynetoo.videotv.presenter.BinderPresenter
+import com.waynetoo.videotv.receiver.USBBroadcastReceiver
+import com.waynetoo.videotv.room.AdDatabase
+import com.waynetoo.videotv.room.entity.AdInfo
 import kotlinx.android.synthetic.main.activity_binder.*
+import kotlinx.coroutines.launch
+
 
 /**
  *
@@ -22,27 +30,41 @@ import kotlinx.android.synthetic.main.activity_binder.*
  */
 class InitActivity : BaseActivity<BinderPresenter>() {
     private val TAG = "waynetoo"
-    private var mIntent: Intent? = null
-
+    private var usbBroadcastReceiver: USBBroadcastReceiver? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_binder)
         initListeners()
         checkStoreNo()
+        registerReceiver()
+    }
+
+    private fun registerReceiver() {
+        usbBroadcastReceiver = USBBroadcastReceiver()
+        val usbDeviceStateFilter = IntentFilter()
+        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+        registerReceiver(usbBroadcastReceiver, usbDeviceStateFilter)
     }
 
     private fun initListeners() {
         btn_sure.setOnClickListener {
-            presenter.getTopicDetail(et_store_no.text.toString())
+            checkInput {
+                presenter.bindStore(it)
+            }
         }
     }
 
     private fun checkStoreNo() {
         Constants.storeNo.isEmpty().yes {
             // 绑定no
+            ll_binder.visibility = View.VISIBLE
+            msg.visibility = View.GONE
         }.otherwise {
+            ll_binder.visibility = View.GONE
+            msg.visibility = View.VISIBLE
             // 请求 广告列表
-
+            presenter.getAdList()
         }
     }
 
@@ -51,10 +73,54 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         toast(msg)
     }
 
-    fun getDetailSuccess(topic: Topic) {
-        topic.run {
+    private fun checkInput(valid: (id: String) -> Unit) {
+        if (et_store_no.text.isNullOrBlank()) {
+            toast(getString(R.string.login_tel_hint))
+        } else if (et_store_no.text.toString().length != 12) {
+            toast(R.string.store_id_number_illegal)
+        } else {
+            valid(et_store_no.text.toString())
         }
     }
+
+    fun bindSuccess(storeNo: String) {
+        Constants.storeNo = storeNo
+        checkStoreNo()
+    }
+
+    /**
+     * 获取广告成功
+     */
+    fun getAdListSuccess(remoteList: List<AdInfo>) {
+        if (remoteList.isEmpty()) {
+            msg.text = "广告列表为空，请添加广告 。。"
+            return
+        }
+        val adDao = AdDatabase.getDatabase(AppContext).adDao()
+        launch {
+            msg.text = "校验广告中。。。"
+            val localList = adDao.getAdList()
+            val updateList =
+                remoteList.filterNot { remote -> localList.any { it.videoName == remote.videoName && it.modifiedTimes == remote.modifiedTimes } }
+
+            if (updateList.isEmpty()) {
+                //播放列表
+                Constants.playAdList = remoteList
+                startActivity(Intent(this@InitActivity, MainActivity.javaClass))
+            } else {
+                msg.text = "更新广告中。。。"
+                //更新列表
+//                updateList
+                println("updateList" + updateList)
+                // 删除广告
+                val deleteList =
+                    localList.filterNot { local -> remoteList.any { it.videoName == local.videoName } }
+                println("deleteList" + deleteList)
+
+            }
+        }
+    }
+
 
     override fun onResume() {
         super.onResume()
@@ -63,5 +129,6 @@ class InitActivity : BaseActivity<BinderPresenter>() {
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(usbBroadcastReceiver)
     }
 }

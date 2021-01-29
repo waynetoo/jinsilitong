@@ -9,15 +9,36 @@ import com.waynetoo.videotv.ui.InitActivity
 /**
  */
 class BinderPresenter : BasePresenter<InitActivity>() {
-    fun getTopicDetail(topicId: String) {
-        Service.client.getTopicDetail(topicId)
+    fun bindStore(storeNo: String) {
+        Service.client.bindStore(storeNo)
             .dispatchDefault()
             .commonSubscribe(
                 onSuccess = {
                     if (it == null) {
                         return@commonSubscribe
                     }
-                    view.getDetailSuccess(it)
+                    view.bindSuccess(it.storeNo)
+                }, onFailure = {
+                    view.toastError(it.msg)
+                },
+                onError = {
+                    it.message?.let { msg -> view.toastError(msg) }
+                }
+            )
+    }
+
+    /**
+     * 获取广告
+     */
+    fun getAdList() {
+        Service.client.getAdVideos()
+            .dispatchDefault()
+            .commonSubscribe(
+                onSuccess = {
+                    if (it == null) {
+                        return@commonSubscribe
+                    }
+                    view.getAdListSuccess(it)
                 }, onFailure = {
                     view.toastError(it.msg)
                 },
