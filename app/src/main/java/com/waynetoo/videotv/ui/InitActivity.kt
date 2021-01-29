@@ -5,6 +5,10 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.view.View
+import com.liulishuo.filedownloader.BaseDownloadTask
+import com.liulishuo.filedownloader.FileDownloadListener
+import com.liulishuo.filedownloader.FileDownloadQueueSet
+import com.liulishuo.filedownloader.FileDownloader
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.otherwise
 import com.waynetoo.lib_common.extentions.toast
@@ -101,8 +105,8 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             msg.text = "校验广告中。。。"
             val localList = adDao.getAdList()
             val updateList =
-                remoteList.filterNot { remote -> localList.any { it.videoName == remote.videoName && it.modifiedTimes == remote.modifiedTimes } }
-
+                remoteList.filterNot { remote -> localList.any { it.videoName == remote.videoName && it.md5 == remote.md5 } }
+            println("updateList" + updateList)
             if (updateList.isEmpty()) {
                 //播放列表
                 Constants.playAdList = remoteList
@@ -111,16 +115,90 @@ class InitActivity : BaseActivity<BinderPresenter>() {
                 msg.text = "更新广告中。。。"
                 //更新列表
 //                updateList
-                println("updateList" + updateList)
+                val queueSet = FileDownloadQueueSet(downloadListener)
+                val tasks: MutableList<BaseDownloadTask> = ArrayList()
+                for (ad in updateList) {
+                    tasks.add(
+                        FileDownloader.getImpl().create(ad.downloadUrl).setTag(ad.id)
+                            .setPath(Constants.filesMovies, true)
+                    )
+                }
+                queueSet.disableCallbackProgressTimes()
+                queueSet.setAutoRetryTimes(1)
+                // 并行执行该任务队列
+                queueSet.downloadTogether(tasks)
+                // 最后你需要主动调用start方法来启动该Queue
+                queueSet.start()
+
                 // 删除广告
                 val deleteList =
                     localList.filterNot { local -> remoteList.any { it.videoName == local.videoName } }
                 println("deleteList" + deleteList)
-
             }
         }
     }
 
+
+    val downloadListener: FileDownloadListener = object : FileDownloadListener() {
+        override fun pending(
+            task: BaseDownloadTask,
+            soFarBytes: Int,
+            totalBytes: Int
+        ) {
+            println("pending =" + task.path)
+        }
+
+        override fun connected(
+            task: BaseDownloadTask,
+            etag: String,
+            isContinue: Boolean,
+            soFarBytes: Int,
+            totalBytes: Int
+        ) {
+            println("connected =" + task.filename)
+        }
+
+        override fun progress(
+            task: BaseDownloadTask,
+            soFarBytes: Int,
+            totalBytes: Int
+        ) {
+            println("progress =" + soFarBytes + " ->" + totalBytes)
+        }
+
+        override fun blockComplete(task: BaseDownloadTask) {
+            println("blockComplete =" + task.filename)
+        }
+
+        override fun retry(
+            task: BaseDownloadTask,
+            ex: Throwable,
+            retryingTimes: Int,
+            soFarBytes: Int
+        ) {
+            println("retry =" + task.filename)
+        }
+
+        override fun completed(task: BaseDownloadTask) {
+            println("completed1 =" + task.filename)
+            println("completed2=" + task.path)
+        }
+
+        override fun paused(
+            task: BaseDownloadTask,
+            soFarBytes: Int,
+            totalBytes: Int
+        ) {
+        }
+
+        override fun error(task: BaseDownloadTask, e: Throwable) {
+            println("error =" + e.message)
+        }
+
+        override fun warn(task: BaseDownloadTask) {
+            println("warn =" + task.filename)
+        }
+    }
 
     override fun onResume() {
         super.onResume()

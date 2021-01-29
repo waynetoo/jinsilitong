@@ -1,0 +1,70 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "7aab16b9ef13880b3c05f04d327f0abf",
+    "entities": [
+      {
+        "tableName": "ad_info",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`videoName` TEXT NOT NULL, `id` TEXT NOT NULL, `storeNo` TEXT, `downloadUrl` TEXT, `md5` TEXT NOT NULL, `modifiedTimes` TEXT NOT NULL, `filePath` TEXT NOT NULL, PRIMARY KEY(`videoName`))",
+        "fields": [
+          {
+            "fieldPath": "videoName",
+            "columnName": "videoName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeNo",
+            "columnName": "storeNo",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "downloadUrl",
+            "columnName": "downloadUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "md5",
+            "columnName": "md5",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedTimes",
+            "columnName": "modifiedTimes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "filePath",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "videoName"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7aab16b9ef13880b3c05f04d327f0abf')"
+    ]
+  }
+}

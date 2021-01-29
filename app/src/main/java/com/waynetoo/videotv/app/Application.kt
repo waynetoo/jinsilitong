@@ -1,5 +1,6 @@
 package com.waynetoo.videotv.app
 
+import com.liulishuo.filedownloader.FileDownloader
 import com.waynetoo.lib_common.App
 
 /**
@@ -15,7 +16,7 @@ class Application : App() {
     }
 
     private fun initParam() {
-
+        FileDownloader.setup(this)
 
     }
 }

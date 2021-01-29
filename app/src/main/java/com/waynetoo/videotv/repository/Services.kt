@@ -23,8 +23,8 @@ interface AdApi {
     /**
      * 选题详情
      */
-    @GET("jeeplus/tobaccoAd/adVideos/get")
-    fun getAdVideos(): Observable<BaseModel<List<AdInfo>>>
+    @GET("jeeplus/tobaccoAd/adVideos/get/{storeNo}")
+    fun getAdVideos(@Path("storeNo") storeNo: String): Observable<BaseModel<List<AdInfo>>>
 
     @GET("jeeplus/tobacco/tobStore/get/{storeNo}")
     fun bindStore(@Path("storeNo") storeNo: String): Observable<BaseModel<Store>>
