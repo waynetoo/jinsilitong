@@ -32,6 +32,6 @@ object Constants {
     /**
      * 存放mp4
      */
-    val filesMovies = AppContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!.absolutePath
-    val filesPic = AppContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!.absolutePath
+    val filesMovies = AppContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
+    val filesPic = AppContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
 }

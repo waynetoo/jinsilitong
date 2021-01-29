@@ -34,9 +34,31 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }
+
+    signingConfigs {
+        release {
+            storeFile file("waynetoo.jks")
+            storePassword "123789"
+            keyAlias "key"
+            keyPassword "123789"
+        }
+        debug{
+
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
+            zipAlignEnabled true
+            shrinkResources false
+//            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled false
+            zipAlignEnabled true
+            shrinkResources false
+//            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
