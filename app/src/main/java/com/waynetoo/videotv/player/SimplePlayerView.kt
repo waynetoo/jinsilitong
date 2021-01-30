@@ -104,11 +104,11 @@ open class SimplePlayerView : PlayerView, IPlayer {
                 when (playbackState) {
                     Player.STATE_BUFFERING -> {
                         Log.d(TAG_VIDEO, "onPlayerStateChanged - STATE_BUFFERING")
-                        context.toast("onPlayerStateChanged - STATE_BUFFERING")
+                        println("onPlayerStateChanged - STATE_BUFFERING")
                     }
                     Player.STATE_READY -> {
                         Log.d(TAG_VIDEO, "onPlayerStateChanged - STATE_READY")
-                        context.toast("onPlayerStateChanged - STATE_READY")
+                        println("onPlayerStateChanged - STATE_READY")
                         // 暂停/播放/拖拽进度条，都会走到这里
                         onVideoStateReady?.invoke()
                         positionCallback?.invoke(
@@ -119,11 +119,11 @@ open class SimplePlayerView : PlayerView, IPlayer {
                     }
                     Player.STATE_IDLE -> {
                         Log.d(TAG_VIDEO, "onPlayerStateChanged - STATE_IDLE")
-                        context.toast("onPlayerStateChanged - STATE_IDLE")
+                        println("onPlayerStateChanged - STATE_IDLE")
                     }
                     Player.STATE_ENDED -> {
                         Log.d(TAG_VIDEO, "onPlayerStateChanged - STATE_ENDED")
-                        context.toast("onPlayerStateChanged - STATE_ENDED")
+                        println("onPlayerStateChanged - STATE_ENDED")
                         onStop?.invoke()
                     }
                 }

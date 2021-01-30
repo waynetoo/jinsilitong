@@ -5,6 +5,7 @@ import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.Preference
 import com.waynetoo.lib_common.extentions.getDeviceId
 import com.waynetoo.videotv.room.entity.AdInfo
+import java.io.File
 
 /**
  * @Author: weiyunl
@@ -30,8 +31,12 @@ object Constants {
     var playAdList: List<AdInfo> = arrayListOf()
 
     /**
-     * 存放mp4
+     * 存放mp4  先检测外部存储，再检测内部存储
      */
-    val filesMovies = AppContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
-    val filesPic = AppContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+//    val filesMovies = AppContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
+//    val filesPic = AppContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    lateinit var filesMovies: File
+//    var filesPic = AppContext.cacheDir
+//    val filesMovies = File(Environment.getExternalStorageDirectory(), "movies")
+//    val filesPic = File(Environment.getExternalStorageDirectory(), "movies")
 }

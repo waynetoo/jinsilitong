@@ -13,4 +13,5 @@
     <string name="login_with_pwd">密码登录</string>
     <string name="login_register">新用户注册</string>
     <string name="resend_verify_code">重新获取{0}S</string>
+    <string name="storage_status_tips">请允许访问您的存储权限</string>
 </resources>

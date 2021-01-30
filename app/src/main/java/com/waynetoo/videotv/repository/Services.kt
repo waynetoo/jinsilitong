@@ -55,7 +55,7 @@ object Service {
         Interceptor { chain ->
             val original = chain.request()
             val request = original.newBuilder()
-                .method(original.method, original.body)
+                .method(original.method(), original.body())
             val storeNo = Constants.storeNo
             storeNo.isNotBlank().yes {
                 request.header(

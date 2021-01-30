@@ -1,9 +1,12 @@
 package com.waynetoo.videotv.ui
 
+import android.Manifest
 import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.os.Bundle
+import android.os.Environment
+import android.os.Environment.*
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
@@ -22,10 +25,10 @@ import com.waynetoo.videotv.receiver.USBBroadcastReceiver
 import com.waynetoo.videotv.room.AdDatabase
 import com.waynetoo.videotv.room.dao.AdDao
 import com.waynetoo.videotv.room.entity.AdInfo
+import com.waynetoo.videotv.utils.USBUtils
 import kotlinx.android.synthetic.main.activity_binder.*
 import kotlinx.coroutines.launch
 import java.io.File
-import java.lang.Exception
 
 
 /**
@@ -47,8 +50,27 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_binder)
         initListeners()
-        checkStoreNo()
         registerReceiver()
+
+        checkPermissions(
+            getString(R.string.storage_status_tips),
+            {
+                USBUtils.initDownloadRoot(this@InitActivity)
+                checkStoreNo()
+//                toast(
+//                    " getFilesDir: " + getFilesDir() + " ...." +
+//                            " getCacheDir: " + getCacheDir() + " ...." +
+//                            " getExternalStorageDirectory: " + getExternalStorageDirectory() + " ...." +
+//                            " getExternalStoragePublicDirectory: " + getExternalStoragePublicDirectory(
+//                        DIRECTORY_MOVIES
+//                    ) + " ...."
+//                )
+
+//                toast( "USBpath.path:"+USBpath.path)
+            },
+            { finish() },
+            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+        )
     }
 
     private fun registerReceiver() {
@@ -129,7 +151,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             Constants.playAdList = remoteList
 
             // 删除广告
-            deleteFiles(localList, remoteList,adDao)
+            deleteFiles(localList, remoteList, adDao)
 
             val updateList =
                 remoteList.filterNot { remote -> localList.any { it.md5 == remote.md5 } }
@@ -170,11 +192,8 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         updateCount = updateList.size
         val tasks: MutableList<DownloadTask> = ArrayList()
         for (ad in updateList) {
-            val storeFile = if (ad.downloadUrl.isVideo()) {
-                Constants.filesMovies!!
-            } else {
-                Constants.filesPic!!
-            }
+            val storeFile =  Constants.filesMovies
+
             val task = DownloadTask.Builder(ad.downloadUrl, storeFile).build()
             tasks.add(task)
         }
@@ -230,7 +249,8 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             task: DownloadTask,
             requestHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-//            println("connectTrialStart"+task.filename)
+            println("connectTrialStart"+task.filename)
+//            this@InitActivity.toast("connectTrialStart  " + task.toString())
         }
 
         override fun downloadFromBreakpoint(task: DownloadTask, info: BreakpointInfo) {
@@ -239,10 +259,13 @@ class InitActivity : BaseActivity<BinderPresenter>() {
 
         override fun fetchStart(task: DownloadTask, blockIndex: Int, contentLength: Long) {
             println("fetchStart" + task.filename)
+            this@InitActivity.toast("fetchStart" + task.toString())
+
         }
 
         override fun fetchProgress(task: DownloadTask, blockIndex: Int, increaseBytes: Long) {
             println("fetchProgress" + task.filename)
+            this@InitActivity.toast("fetchProgress" + blockIndex.toString())
         }
 
         override fun connectEnd(
@@ -260,6 +283,8 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             requestHeaderFields: MutableMap<String, MutableList<String>>
         ) {
             println("connectStart" + task.filename)
+            this@InitActivity.toast("connectStart" + task.filename)
+
         }
     }
 

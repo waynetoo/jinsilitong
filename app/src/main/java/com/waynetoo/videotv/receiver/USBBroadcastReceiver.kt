@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.net.Uri
 import android.widget.Toast
+import com.waynetoo.lib_common.extentions.toast
 
 
 /**
@@ -19,9 +21,12 @@ class USBBroadcastReceiver : BroadcastReceiver() {
         val action = intent.action
         when (action) {
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                Toast.makeText(context, "插入U盘。" + intent.data.toString(), Toast.LENGTH_LONG).show();
+                val uri: Uri? = intent.data
+                context.toast("插入U盘1。" + uri?.path)
+//                context.toast("插入U盘2。" + intent.dataString)
                 val device_add =
                     intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+                context.toast("插入U盘3。" + device_add)
                 if (device_add != null) {
 //                    EventBusUtil.sendEvent(MessageEvent(1))
                 }
