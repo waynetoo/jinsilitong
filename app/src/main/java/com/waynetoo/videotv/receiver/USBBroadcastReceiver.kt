@@ -19,7 +19,7 @@ class USBBroadcastReceiver : BroadcastReceiver() {
         val action = intent.action
         when (action) {
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                Toast.makeText(context, "插入Upan", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "插入U盘。" + intent.data.toString(), Toast.LENGTH_LONG).show();
                 val device_add =
                     intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
                 if (device_add != null) {

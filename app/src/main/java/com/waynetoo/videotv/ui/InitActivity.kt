@@ -11,15 +11,14 @@ import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.cause.ResumeFailedCause
 import com.waynetoo.lib_common.AppContext
-import com.waynetoo.lib_common.extentions.otherwise
-import com.waynetoo.lib_common.extentions.toast
-import com.waynetoo.lib_common.extentions.yes
+import com.waynetoo.lib_common.extentions.*
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
 import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.presenter.BinderPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
 import com.waynetoo.videotv.room.AdDatabase
+import com.waynetoo.videotv.room.dao.AdDao
 import com.waynetoo.videotv.room.entity.AdInfo
 import kotlinx.android.synthetic.main.activity_binder.*
 import kotlinx.coroutines.launch
@@ -37,6 +36,10 @@ import java.lang.Exception
 class InitActivity : BaseActivity<BinderPresenter>() {
     private val TAG = "waynetoo"
     private var usbBroadcastReceiver: USBBroadcastReceiver? = null
+    lateinit var adDao: AdDao
+
+    @Volatile
+    var updateCount: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_binder)
@@ -102,21 +105,33 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             msg.text = "广告列表为空，请添加广告 。。"
             return
         }
-        val adDao = AdDatabase.getDatabase(AppContext).adDao()
+        adDao = AdDatabase.getDatabase(AppContext).adDao()
         launch {
             msg.text = "校验广告中。。。"
+            showProgressDialog()
+            adDao.deletePathEmpty()
             val localList = adDao.getAdList()
+            remoteList.forEach { remote ->
+                val find =
+                    localList.find { it.videoName == remote.videoName && it.md5 == remote.md5 }
+                find?.let {
+                    remote.filePath = it.filePath
+                }
+            }
+//            println("localList " + localList)
             val updateList =
                 remoteList.filterNot { remote -> localList.any { it.videoName == remote.videoName && it.md5 == remote.md5 } }
             println("updateList" + updateList)
+
+
+            //播放列表
+            Constants.playAdList = remoteList
             if (updateList.isEmpty()) {
-                //播放列表
-                Constants.playAdList = remoteList
-                startActivity(Intent(this@InitActivity, MainActivity.javaClass))
+                startActivity(Intent(this@InitActivity, MainActivity::class.java))
+                finish()
             } else {
-                msg.text = "更新广告中。。。"
+                msg.text = "下载广告中。。。"
                 //更新列表
-//                updateList
                 downloadFiles(updateList)
 
                 // 删除广告
@@ -131,26 +146,31 @@ class InitActivity : BaseActivity<BinderPresenter>() {
      * 下载文件
      */
     private fun downloadFiles(updateList: List<AdInfo>) {
+        updateCount = updateList.size
         val tasks: MutableList<DownloadTask> = ArrayList()
         for (ad in updateList) {
-            val task = DownloadTask.Builder(ad.downloadUrl!!, Constants.filesMovies!!).build()
+            val storeFile = if (ad.downloadUrl.isVideo()) {
+                Constants.filesMovies!!
+            } else {
+                Constants.filesPic!!
+            }
+            val task = DownloadTask.Builder(ad.downloadUrl, storeFile).build()
             tasks.add(task)
         }
-        DownloadTask.enqueue(tasks.toTypedArray(), downloadListener); //同时异步执行多个任务
+        DownloadTask.enqueue(tasks.toTypedArray(), downloadListener)  //同时异步执行多个任务
     }
 
     private val downloadListener: DownloadListener = object : DownloadListener {
-
         override fun connectTrialEnd(
             task: DownloadTask,
             responseCode: Int,
             responseHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-            println("connectTrialEnd")
+//            println("connectTrialEnd" +task.filename)
         }
 
         override fun fetchEnd(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-            println("fetchEnd")
+            println("fetchEnd" + task.filename)
         }
 
         override fun downloadFromBeginning(
@@ -158,34 +178,52 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             info: BreakpointInfo,
             cause: ResumeFailedCause
         ) {
-            println("downloadFromBeginning")
+            println("downloadFromBeginning" + task.filename)
         }
 
         override fun taskStart(task: DownloadTask) {
-            println("taskStart")
+//            println("taskStart"+task.filename)
         }
 
         override fun taskEnd(task: DownloadTask, cause: EndCause, realCause: Exception?) {
-            println("taskEnd")
+            println("taskEnd1 " + task.filename)
+            println("taskEnd2 " + task.file?.absolutePath)
+            println("taskEnd3 " + Constants.playAdList)
+            //下载完成
+            if (cause == EndCause.COMPLETED) {
+                launch {
+                    toast(task.filename + " 下载成功")
+                    Constants.playAdList.find { it.videoName == task.filename?.getFileNameNoEx() }
+                        ?.let {
+                            println("taskEnd4 " + task.file?.absoluteFile)
+                            updateCount--
+                            it.filePath = task.file?.absolutePath ?: ""
+                            adDao.insert(it)
+                        }
+                    if (updateCount <= 0) {
+                        downloadSuccess()
+                    }
+                }
+            }
         }
 
         override fun connectTrialStart(
             task: DownloadTask,
             requestHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-            println("connectTrialStart")
+//            println("connectTrialStart"+task.filename)
         }
 
         override fun downloadFromBreakpoint(task: DownloadTask, info: BreakpointInfo) {
-            println("downloadFromBreakpoint")
+            println("downloadFromBreakpoint" + task.filename)
         }
 
         override fun fetchStart(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-            println("fetchStart")
+            println("fetchStart" + task.filename)
         }
 
         override fun fetchProgress(task: DownloadTask, blockIndex: Int, increaseBytes: Long) {
-            println("fetchProgress")
+            println("fetchProgress" + task.filename)
         }
 
         override fun connectEnd(
@@ -194,7 +232,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             responseCode: Int,
             responseHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-            println("connectEnd")
+            println("connectEnd" + task.filename)
         }
 
         override fun connectStart(
@@ -202,14 +240,18 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             blockIndex: Int,
             requestHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-            println("connectStart")
+            println("connectStart" + task.filename)
         }
+    }
+
+    private fun downloadSuccess() {
+        startActivity(Intent(this@InitActivity, MainActivity::class.java))
+        finish()
     }
 
     override fun onResume() {
         super.onResume()
     }
-
 
     override fun onDestroy() {
         super.onDestroy()

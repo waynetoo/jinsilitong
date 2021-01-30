@@ -11,11 +11,11 @@ import kotlinx.serialization.Serializable
 @Entity(tableName = "ad_info")
 @Serializable
 data class AdInfo(
-    @PrimaryKey()
+    @PrimaryKey
     val videoName: String = "",
     val id: String = "",
     val storeNo: String? = "",
-    val downloadUrl: String? = "",
+    val downloadUrl: String = "",
     val md5: String = "",
     val modifiedTimes: String = "",
     var filePath: String = ""

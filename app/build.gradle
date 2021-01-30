@@ -42,23 +42,20 @@ android {
             keyAlias "key"
             keyPassword "123789"
         }
-        debug{
-
-        }
     }
     buildTypes {
         release {
             minifyEnabled false
             zipAlignEnabled true
             shrinkResources false
-//            signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         release {
             minifyEnabled false
             zipAlignEnabled true
             shrinkResources false
-//            signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

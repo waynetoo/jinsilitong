@@ -12,13 +12,46 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitCenter"
-        android:visibility="gone"
-        android:src="@drawable/app_icon_your_company" />
+        android:src="@drawable/app_icon_your_company"
+        android:visibility="gone" />
 
     <com.waynetoo.videotv.player.SimplePlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:focusable="true"
-        app:use_controller="false" />
+        app:use_controller="false">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="playNext"
+                android:text="播放下一个 " />
+
+            <Button
+                android:id="@+id/button3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="100dp"
+                android:onClick="scanCode"
+                android:text="播放扫码" />
+
+            <Button
+                android:id="@+id/button4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="100dp"
+                android:onClick="undateAd"
+                android:text="响应更新广告" />
+        </LinearLayout>
+    </com.waynetoo.videotv.player.SimplePlayerView>
+
+
 </FrameLayout>

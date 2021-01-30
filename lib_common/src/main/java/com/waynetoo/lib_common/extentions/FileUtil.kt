@@ -16,8 +16,6 @@ import java.io.InputStream
 /**
  * on 2019/4/9
  */
-const val IMAGE_CACHE_PATH = "/zjs/pictures"
-
 fun readAssetsToString(file: String): String {
     val inputStream: InputStream
     try {
@@ -65,11 +63,17 @@ private fun getRealPathFromUriAboveApi19(context: Context, uri: Uri): String? {
         val documentId = DocumentsContract.getDocumentId(uri)
         if (isMediaDocument(uri)) { // MediaProvider
             // 使用':'分割
-            val id = documentId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
+            val id =
+                documentId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
 
             val selection = MediaStore.Images.Media._ID + "=?"
             val selectionArgs = arrayOf(id)
-            filePath = getDataColumn(context, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs)
+            filePath = getDataColumn(
+                context,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+            )
         } else if (isDownloadsDocument(uri)) { // DownloadsProvider
             val contentUri = ContentUris.withAppendedId(
                 Uri.parse("content://downloads/public_downloads"),
@@ -91,7 +95,12 @@ private fun getRealPathFromUriAboveApi19(context: Context, uri: Uri): String? {
  * 获取数据库表中的 _data 列，即返回Uri对应的文件路径
  * @return
  */
-private fun getDataColumn(context: Context, uri: Uri, selection: String?, selectionArgs: Array<String>?): String? {
+private fun getDataColumn(
+    context: Context,
+    uri: Uri,
+    selection: String?,
+    selectionArgs: Array<String>?
+): String? {
     var path: String? = null
 
     val projection = arrayOf(MediaStore.Images.Media.DATA)
@@ -125,3 +134,13 @@ private fun isDownloadsDocument(uri: Uri): Boolean {
     return "com.android.providers.downloads.documents" == uri.authority
 }
 
+
+fun String.getFileNameNoEx(): String {
+    if (length > 0) {
+        val dot = lastIndexOf('.')
+        if (dot > -1 && dot < length) {
+            return substring(0, dot)
+        }
+    }
+    return ""
+}

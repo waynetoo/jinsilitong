@@ -36,9 +36,9 @@ interface AdApi {
  */
 object Service {
     val BASE_URL = "http://39.99.150.10:9000/"
-    val lazyMgr = resettableManager()
+//    val lazyMgr = resettableManager()
 
-    private val retrofit by resettableLazy(lazyMgr) {
+    private val retrofit by lazy {
         builder.client(
             buildCommonClient()
                 .addInterceptor(headerInterceptor)
@@ -49,9 +49,9 @@ object Service {
             .build()
     }
 
-    val client: AdApi by resettableLazy(lazyMgr) { retrofit.create(AdApi::class.java) }
+    val client: AdApi by lazy { retrofit.create(AdApi::class.java) }
 
-    private val headerInterceptor by resettableLazy(lazyMgr) {
+    private val headerInterceptor by lazy {
         Interceptor { chain ->
             val original = chain.request()
             val request = original.newBuilder()

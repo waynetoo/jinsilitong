@@ -1,11 +1,9 @@
 package com.waynetoo.videotv.mqtt
 
-import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
@@ -105,15 +103,17 @@ class MyMqttService : Service() {
      * 连接MQTT服务器
      */
     private fun doClientConnection() {
-        if (!mqttAndroidClient!!.isConnected && isConnectIsNomarl) {
-            try {
-                mqttAndroidClient!!.connect(
-                    mMqttConnectOptions,
-                    null,
-                    iMqttActionListener
-                )
-            } catch (e: MqttException) {
-                e.printStackTrace()
+        mqttAndroidClient?.let {
+            if (!it.isConnected && isConnectIsNomarl) {
+                try {
+                    it.connect(
+                        mMqttConnectOptions,
+                        null,
+                        iMqttActionListener
+                    )
+                } catch (e: MqttException) {
+                    e.printStackTrace()
+                }
             }
         }
     }
@@ -143,7 +143,7 @@ class MyMqttService : Service() {
         override fun onSuccess(arg0: IMqttToken) {
             Log.i(TAG, "连接成功 ")
             try {
-                mqttAndroidClient!!.subscribe(
+                mqttAndroidClient?.subscribe(
                     PUBLISH_TOPIC,
                     2
                 ) //订阅主题，参数：主题、服务质量
@@ -185,10 +185,14 @@ class MyMqttService : Service() {
     }
 
     override fun onDestroy() {
-        try {
-            mqttAndroidClient!!.disconnect() //断开连接
-        } catch (e: MqttException) {
-            e.printStackTrace()
+        mqttAndroidClient?.let {
+            if (it.isConnected) {
+                try {
+                    it.disconnect() //断开连接
+                } catch (e: MqttException) {
+                    e.printStackTrace()
+                }
+            }
         }
         super.onDestroy()
     }
@@ -204,12 +208,16 @@ class MyMqttService : Service() {
          * @param message 消息
          */
         fun publish(message: String) {
+            if (mqttAndroidClient == null || !mqttAndroidClient!!.isConnected) {
+                return
+            }
+
             val topic = PUBLISH_TOPIC
             val qos = 2
             val retained = false
             try {
                 //参数分别为：主题、消息的字节数组、服务质量、是否在服务器保留断开连接后的最后一条消息
-                mqttAndroidClient!!.publish(
+                mqttAndroidClient?.publish(
                     topic,
                     message.toByteArray(),
                     qos,

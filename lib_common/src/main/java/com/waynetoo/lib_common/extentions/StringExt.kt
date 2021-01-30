@@ -66,3 +66,13 @@ fun String.isPhoneNumber(): Boolean {
     val pattern = """[1][3-9][0-9]{9}${'$'}"""
     return Regex(pattern).matches(this)
 }
+
+fun String.isVideo(): Boolean {
+    val pattern = """.+(.MP4|.mp4|.avi|.AVI)${'$'}"""
+    return Regex(pattern).matches(this)
+}
+
+fun String.isPicture(): Boolean {
+    val pattern = """.+(.JPEG|.jpeg|.JPG|.jpg|.png|.PNG)${'$'}"""
+    return Regex(pattern).matches(this)
+}
