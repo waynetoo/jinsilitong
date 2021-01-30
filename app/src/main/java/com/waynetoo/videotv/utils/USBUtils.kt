@@ -106,7 +106,7 @@ object USBUtils {
         if (checkSDCard()) {
             Constants.filesMovies =
                 context.getExternalFilesDir(Environment.DIRECTORY_MOVIES) ?: context.filesDir
-            context.toast("sdcard 可用：$context.externalCacheDir")
+            context.toast("sdcard 可用：  "+Constants.filesMovies)
         } else {
             Constants.filesMovies = context.filesDir
             context.toast("sdcard 不可用")
