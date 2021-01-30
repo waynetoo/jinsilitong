@@ -9,7 +9,7 @@ import com.waynetoo.videotv.room.entity.AdInfo
 
 @Database(
     entities = [AdInfo::class],
-    version = 1
+    version = 3
 )
 abstract class AdDatabase : RoomDatabase() {
 
@@ -29,7 +29,8 @@ abstract class AdDatabase : RoomDatabase() {
                     context.applicationContext,
                     AdDatabase::class.java,
                     "ad_database"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 return instance
             }

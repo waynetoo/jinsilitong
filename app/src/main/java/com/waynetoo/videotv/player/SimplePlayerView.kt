@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.util.AttributeSet
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayerFactory
@@ -124,8 +125,6 @@ open class SimplePlayerView : PlayerView, IPlayer {
                         Log.d(TAG_VIDEO, "onPlayerStateChanged - STATE_ENDED")
                         context.toast("onPlayerStateChanged - STATE_ENDED")
                         onStop?.invoke()
-                        //因为需要展示分享重播界面，所以隐藏控制栏
-                        hideController()
                     }
                 }
                 playerCallback?.invoke(playWhenReady, playbackState)
@@ -179,51 +178,10 @@ open class SimplePlayerView : PlayerView, IPlayer {
         return player?.playbackState ?: 0
     }
 
-//    fun initSwitchResolution(videoList: List<String>) {
-//        currentUrl = videoList[0]
-//        this.videoUrlList.addAll(videoList)
-//        controller?.tvSD?.setUrlIsSelected(true)
-//        if (videoUrlList.size > 1) {
-//            controller?.tvHD?.visibility = View.VISIBLE
-//            if (videoUrlList.size > 2)
-//                controller?.tvFHD?.visibility = View.VISIBLE
-//        }
-//        controller?.tvSwitchResolution?.setOnClickListener {
-//            resolutionSwitcherShow.yes {
-//                resolutionSwitcherShow = false
-//            } otherwise {
-//                resolutionSwitcherShow = true
-//            }
-//        }
-//        controller?.tvSD?.setOnClickListener {
-//            if (videoUrlList[0] != currentUrl) {
-//                val prePos = currentPosition
-//                reSelectUrl(0)
-//                setSource(videoUrlList[0])
-//                seekTo(prePos)
-//                controller.tvSwitchResolution?.text = resources.getText(R.string.SD)
-//            }
-//            resolutionSwitcherShow = false
-//        }
-//        controller?.tvHD?.setOnClickListener {
-//            if (videoUrlList[1] != currentUrl) {
-//                val prePos = currentPosition
-//                setSource(videoUrlList[1])
-//                reSelectUrl(1)
-//                seekTo(prePos)
-//                controller.tvSwitchResolution?.text = resources.getText(R.string.HD)
-//            }
-//            resolutionSwitcherShow = false
-//        }
-//        controller?.tvFHD?.setOnClickListener {
-//            if (videoUrlList[2] != currentUrl) {
-//                val prePos = currentPosition
-//                setSource(videoUrlList[2])
-//                reSelectUrl(2)
-//                seekTo(prePos)
-//                controller.tvSwitchResolution?.text = resources.getText(R.string.FHD)
-//            }
-//            resolutionSwitcherShow = false
-//        }
-//    }
+    override fun setVisibility(visibility: Int) {
+        super.setVisibility(visibility)
+        if (visibility == View.GONE) {
+            pause()
+        }
+    }
 }

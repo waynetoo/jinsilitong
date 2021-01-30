@@ -4,7 +4,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
+import android.widget.Toast
 import com.liulishuo.okdownload.DownloadListener
 import com.liulishuo.okdownload.DownloadTask
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
@@ -22,6 +24,7 @@ import com.waynetoo.videotv.room.dao.AdDao
 import com.waynetoo.videotv.room.entity.AdInfo
 import kotlinx.android.synthetic.main.activity_binder.*
 import kotlinx.coroutines.launch
+import java.io.File
 import java.lang.Exception
 
 
@@ -69,6 +72,8 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             // 绑定no
             ll_binder.visibility = View.VISIBLE
             msg.visibility = View.GONE
+            et_store_no.requestFocus()
+            et_store_no.setText("320201215431")
         }.otherwise {
             ll_binder.visibility = View.GONE
             msg.visibility = View.VISIBLE
@@ -113,19 +118,22 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             val localList = adDao.getAdList()
             remoteList.forEach { remote ->
                 val find =
-                    localList.find { it.videoName == remote.videoName && it.md5 == remote.md5 }
+                    localList.find { it.md5 == remote.md5 }
                 find?.let {
                     remote.filePath = it.filePath
+                    remote.videoAd = it.videoAd
                 }
             }
 //            println("localList " + localList)
-            val updateList =
-                remoteList.filterNot { remote -> localList.any { it.videoName == remote.videoName && it.md5 == remote.md5 } }
-            println("updateList" + updateList)
-
-
             //播放列表
             Constants.playAdList = remoteList
+
+            // 删除广告
+            deleteFiles(localList, remoteList,adDao)
+
+            val updateList =
+                remoteList.filterNot { remote -> localList.any { it.md5 == remote.md5 } }
+            println("updateList" + updateList)
             if (updateList.isEmpty()) {
                 startActivity(Intent(this@InitActivity, MainActivity::class.java))
                 finish()
@@ -133,12 +141,25 @@ class InitActivity : BaseActivity<BinderPresenter>() {
                 msg.text = "下载广告中。。。"
                 //更新列表
                 downloadFiles(updateList)
-
-                // 删除广告
-                val deleteList =
-                    localList.filterNot { local -> remoteList.any { it.videoName == local.videoName } }
-                println("deleteList" + deleteList)
             }
+        }
+    }
+
+    /**
+     * 删除文件
+     */
+    private suspend fun deleteFiles(
+        localList: List<AdInfo>,
+        remoteList: List<AdInfo>,
+        adDao: AdDao
+    ) {
+        val deleteList =
+            localList.filterNot { local -> remoteList.any { it.md5 == local.md5 } }
+        println("deleteList  $deleteList")
+        deleteList.forEach {
+            //删除数据库 和文件
+            adDao.delete(it)
+            File(it.filePath).delete()
         }
     }
 
@@ -186,20 +207,18 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         }
 
         override fun taskEnd(task: DownloadTask, cause: EndCause, realCause: Exception?) {
-            println("taskEnd1 " + task.filename)
             println("taskEnd2 " + task.file?.absolutePath)
-            println("taskEnd3 " + Constants.playAdList)
             //下载完成
             if (cause == EndCause.COMPLETED) {
                 launch {
-                    toast(task.filename + " 下载成功")
-                    Constants.playAdList.find { it.videoName == task.filename?.getFileNameNoEx() }
+                    Constants.playAdList.find { it.downloadUrl == task.url }
                         ?.let {
-                            println("taskEnd4 " + task.file?.absoluteFile)
                             updateCount--
                             it.filePath = task.file?.absolutePath ?: ""
+                            it.videoAd = it.downloadUrl.isVideo()
                             adDao.insert(it)
                         }
+                    toast(task.filename + " 下载成功," + "剩余 " + updateCount + "个")
                     if (updateCount <= 0) {
                         downloadSuccess()
                     }
@@ -256,5 +275,28 @@ class InitActivity : BaseActivity<BinderPresenter>() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(usbBroadcastReceiver)
+    }
+
+
+    /**
+     * 通过监听keyUp   实现双击返回键退出程序
+     * @param keyCode
+     * @param event
+     * @return
+     */
+    //记录用户首次点击返回键的时间
+    private var firstTime: Long = 0
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() === KeyEvent.ACTION_UP) {
+            val secondTime = System.currentTimeMillis()
+            if (secondTime - firstTime > 2000) {
+                Toast.makeText(applicationContext, "再按一次退出程序", Toast.LENGTH_SHORT).show()
+                firstTime = secondTime
+                return true
+            } else {
+                finish()
+            }
+        }
+        return super.onKeyUp(keyCode, event)
     }
 }

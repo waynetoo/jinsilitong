@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "29f3aa866198866da0586d79af13e82d",
+    "identityHash": "d73e03fbe46f9f9a77a8558e9efec009",
     "entities": [
       {
         "tableName": "ad_info",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`videoName` TEXT NOT NULL, `id` TEXT NOT NULL, `storeNo` TEXT, `downloadUrl` TEXT NOT NULL, `md5` TEXT NOT NULL, `modifiedTimes` TEXT NOT NULL, `filePath` TEXT NOT NULL, PRIMARY KEY(`videoName`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`videoName` TEXT NOT NULL, `id` TEXT NOT NULL, `storeNo` TEXT, `downloadUrl` TEXT NOT NULL, `md5` TEXT NOT NULL, `modifiedTimes` TEXT NOT NULL, `filePath` TEXT NOT NULL, `isVideo` INTEGER NOT NULL, PRIMARY KEY(`md5`))",
         "fields": [
           {
             "fieldPath": "videoName",
@@ -49,11 +49,17 @@
             "columnName": "filePath",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "isVideo",
+            "columnName": "isVideo",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "videoName"
+            "md5"
           ],
           "autoGenerate": false
         },
@@ -64,7 +70,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '29f3aa866198866da0586d79af13e82d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd73e03fbe46f9f9a77a8558e9efec009')"
     ]
   }
 }
