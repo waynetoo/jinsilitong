@@ -128,10 +128,13 @@ class MainActivity : BaseActivity<MainPresenter>() {
             // 删除广告
 //            deleteFiles(remoteList)
 //            val updateList = getUpdateList(remoteList)
-            //与播放列表对比
+            //与播放列表对比  远程有 ，播放列表没有
             val updateList =
                 remoteList.filterNot { remote -> playAdList.any { it.md5 == remote.md5 } }
 
+            //播放列表有,远程没有
+            val updatePlayList =
+                playAdList.filterNot { play -> remoteList.any { it.md5 == play.md5 } }
             println("updateList$updateList")
             if (updateList.isNotEmpty()) {
                 //图片不考察
@@ -148,6 +151,11 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 }, {
                     initData()
                 }).downloadFiles(updateList)
+            } else if (updatePlayList.isNotEmpty()) {
+                toast("广告更新，请稍后...")
+                initData()
+            } else {
+                toast("暂无更新...")
             }
         }
     }

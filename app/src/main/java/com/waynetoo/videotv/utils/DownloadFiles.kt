@@ -5,11 +5,7 @@ import com.liulishuo.okdownload.DownloadTask
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.cause.ResumeFailedCause
-import com.waynetoo.lib_common.extentions.isVideo
-import com.waynetoo.lib_common.extentions.toast
-import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.room.entity.AdInfo
-import kotlinx.coroutines.launch
 
 class DownloadFiles {
 
