@@ -25,34 +25,38 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
             android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="10dp"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <Button
                 android:id="@+id/button2"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/selector_focus_btn"
                 android:onClick="playNext"
+                android:padding="4dp"
                 android:text="播放下一个 " />
 
             <Button
                 android:id="@+id/button3"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="50dp"
                 android:background="@drawable/selector_focus_btn"
                 android:onClick="scanCode"
+                android:padding="4dp"
                 android:text="播放扫码广告" />
 
             <Button
                 android:id="@+id/button4"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="50dp"
                 android:background="@drawable/selector_focus_btn"
                 android:onClick="undateAd"
+                android:padding="4dp"
                 android:text="更新广告" />
         </LinearLayout>
     </com.waynetoo.videotv.player.SimplePlayerView>

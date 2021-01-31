@@ -6,19 +6,15 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
-import com.liulishuo.okdownload.OkDownload
-import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.*
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
 import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.presenter.BinderPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
-import com.waynetoo.videotv.room.AdDatabase
 import com.waynetoo.videotv.room.entity.AdInfo
 import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_binder.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
