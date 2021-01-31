@@ -16,9 +16,14 @@ data class AdInfo(
     var storeNo: String? = "",
     var downloadUrl: String = "",
     var modifiedTimes: String = "",
-    var filePath: String = "",
+    var fileName: String = "",
     @Ignore
     var currentPosition: Long = 0L,
     var videoAd: Boolean = true
-) : Parcelable
+) : Parcelable {
+    fun setData(local: AdInfo) {
+        fileName = local.fileName
+        videoAd = local.videoAd
+    }
+}
 

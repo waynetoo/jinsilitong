@@ -48,11 +48,11 @@ class DownloadFiles {
             responseCode: Int,
             responseHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-            println("connectTrialEnd" + task.filename)
+//            println("connectTrialEnd" + task.filename)
         }
 
         override fun fetchEnd(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-            println("fetchEnd " + task.filename)
+//            println("fetchEnd " + task.filename)
         }
 
         override fun downloadFromBeginning(
@@ -60,7 +60,7 @@ class DownloadFiles {
             info: BreakpointInfo,
             cause: ResumeFailedCause
         ) {
-            println("downloadFromBeginning " + task.filename)
+//            println("downloadFromBeginning " + task.filename)
         }
 
         override fun taskStart(task: DownloadTask) {
@@ -86,15 +86,15 @@ class DownloadFiles {
         }
 
         override fun downloadFromBreakpoint(task: DownloadTask, info: BreakpointInfo) {
-            println("downloadFromBreakpoint " + task.filename)
+//            println("downloadFromBreakpoint " + task.filename)
         }
 
         override fun fetchStart(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-            println("fetchStart" + task.filename)
+//            println("fetchStart" + task.filename)
         }
 
         override fun fetchProgress(task: DownloadTask, blockIndex: Int, increaseBytes: Long) {
-            println("fetchProgress" + task.filename)
+//            println("fetchProgress" + task.filename)
         }
 
         override fun connectEnd(
@@ -103,7 +103,7 @@ class DownloadFiles {
             responseCode: Int,
             responseHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-            println("connectEnd" + task.filename)
+//            println("connectEnd" + task.filename)
         }
 
         override fun connectStart(
@@ -111,7 +111,7 @@ class DownloadFiles {
             blockIndex: Int,
             requestHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-            println("connectStart" + task.filename)
+//            println("connectStart" + task.filename)
         }
     }
 }

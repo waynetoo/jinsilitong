@@ -31,6 +31,6 @@ interface AdDao {
     @Query("DELETE FROM ad_info")
     suspend fun deleteAll()
 
-    @Query("DELETE FROM ad_info where filePath ='' or filePath  is null")
+    @Query("DELETE FROM ad_info where fileName ='' or fileName  is null")
     suspend fun deletePathEmpty()
 }

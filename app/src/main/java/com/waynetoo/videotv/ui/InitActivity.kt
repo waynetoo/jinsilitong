@@ -121,12 +121,16 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         launch {
             msg.text = "校验广告中。。。"
             showProgressDialog()
-            syncLocal2Remote(remoteList)
             // 删除广告
             deleteFiles(remoteList)
 
+            syncLocal2Remote(remoteList)
+
             val updateList = getUpdateList(remoteList)
-            println("updateList$updateList")
+//            println("updateList$updateList")
+//            toast("playAdList 1:"+Constants.playAdList)
+//            println("Constants.playAdList:"+Constants.playAdList)
+
             if (updateList.isEmpty()) {
                 startActivity(Intent(this@InitActivity, MainActivity::class.java))
                 finish()

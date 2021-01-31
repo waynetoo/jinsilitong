@@ -20,7 +20,10 @@ import com.waynetoo.videotv.mqtt.MyMqttService
 import com.waynetoo.videotv.presenter.MainPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
 import com.waynetoo.videotv.room.entity.AdInfo
-import com.waynetoo.videotv.utils.*
+import com.waynetoo.videotv.utils.DownloadFiles
+import com.waynetoo.videotv.utils.USBUtils
+import com.waynetoo.videotv.utils.insertUpdateAd
+import com.waynetoo.videotv.utils.syncLocal2Remote
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -135,7 +138,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
             //播放列表有,远程没有
             val updatePlayList =
                 playAdList.filterNot { play -> remoteList.any { it.md5 == play.md5 } }
-            println("updateList$updateList")
+//            println("updateList$updateList")
             if (updateList.isNotEmpty()) {
                 //图片不考察
                 if (playerView.isPlaying) {
@@ -177,9 +180,9 @@ class MainActivity : BaseActivity<MainPresenter>() {
                     }
                 } else {
                     if (state == Player.STATE_READY && playWhenReady) {  // 播放中
-                        println("playerCallback  播放中")
+//                        println("playerCallback  播放中")
                     } else if (state == Player.STATE_READY && !playWhenReady) {  // 暂停中
-                        println("playerCallback  暂停中")
+//                        println("playerCallback  暂停中")
                         //?
                     }
                 }
@@ -215,19 +218,20 @@ class MainActivity : BaseActivity<MainPresenter>() {
      * 播放
      */
     private fun play(adInfo: AdInfo) {
-        println("play :" + adInfo.filePath)
+//        println("play :" + USBUtils.createFilePath(adInfo.fileName))
+//        toast("play :" + USBUtils.createFilePath(adInfo.fileName))
         if (adInfo.videoAd) {
-            playerView.setSource(adInfo.filePath)
+            playerView.setSource(USBUtils.createFilePath(adInfo.fileName))
             playerView.start()
             playerView.seekTo(adInfo.currentPosition)
-            println("seekTo :" + adInfo.currentPosition)
+//            println("seekTo :" + adInfo.currentPosition)
             if (!playerView.isVisible) {
                 playerView.visibility = View.VISIBLE
                 imageView.visibility = View.GONE
             }
         } else {
             //暂停视频
-            Glide.with(this).load(File(adInfo.filePath)).into(imageView)
+            Glide.with(this).load(File(USBUtils.createFilePath(adInfo.fileName))).into(imageView)
             handler.removeMessages(WHAT_DELAY_PIC_END)
             handler.sendEmptyMessageDelayed(WHAT_DELAY_PIC_END, PIC_SHOW_TIME)
             if (playerView.isVisible) {

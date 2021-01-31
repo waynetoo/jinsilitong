@@ -9,7 +9,7 @@ import com.waynetoo.videotv.room.entity.AdInfo
 
 @Database(
     entities = [AdInfo::class],
-    version = 3
+    version = 5
 )
 abstract class AdDatabase : RoomDatabase() {
 

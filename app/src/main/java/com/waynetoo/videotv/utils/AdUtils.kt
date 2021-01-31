@@ -38,13 +38,15 @@ suspend fun fetchData(): String {
  */
 suspend fun deleteFiles(remoteList: List<AdInfo>) {
     val adDao = AdDatabase.getDatabase(AppContext).adDao()
+    adDao.deletePathEmpty()
     val localList = adDao.getAdList()
     val deleteList =
         localList.filterNot { local -> remoteList.any { it.md5 == local.md5 } }
+    println("deleteFiles:" + localList)
     adDao.deleteList(deleteList)
     deleteList.forEach {
         //删除数据库 和文件
-        File(it.filePath).delete()
+        File(USBUtils.createFilePath(it.fileName)).delete()
     }
 }
 
@@ -53,13 +55,12 @@ suspend fun deleteFiles(remoteList: List<AdInfo>) {
  */
 suspend fun syncLocal2Remote(remoteList: List<AdInfo>) {
     val adDao = AdDatabase.getDatabase(AppContext).adDao()
-    adDao.deletePathEmpty()
     val localList = adDao.getAdList()
+    println("syncLocal2Remote:" + localList)
     remoteList.forEach { remote ->
         localList.find { it.md5 == remote.md5 }
             ?.let {
-                remote.filePath = it.filePath
-                remote.videoAd = it.videoAd
+                remote.setData(it)
             }
     }
 }
@@ -67,15 +68,26 @@ suspend fun syncLocal2Remote(remoteList: List<AdInfo>) {
 suspend fun getUpdateList(remoteList: List<AdInfo>): List<AdInfo> {
     val adDao = AdDatabase.getDatabase(AppContext).adDao()
     val localList = adDao.getAdList()
-    return remoteList.filterNot { remote -> localList.any { it.md5 == remote.md5 } }
+
+    val createUsbDir = USBUtils.createUsbDir()
+    val fileName = createUsbDir.list()
+    println("getUpdateList:" + localList)
+    return remoteList.filterNot { remote ->
+        localList.any {
+            it.md5 == remote.md5 && fileName.any { name -> it.fileName == name }
+        }
+    }
 }
 
 suspend fun insertUpdateAd(playAdList: List<AdInfo>, task: DownloadTask) {
     val adDao = AdDatabase.getDatabase(AppContext).adDao()
     playAdList.find { it.downloadUrl == task.url }
-        ?.let {
-            it.filePath = task.file?.absolutePath ?: ""
-            it.videoAd = it.downloadUrl.isVideo()
-            adDao.insert(it)
+        ?.let { adInfo ->
+            task.file?.let {
+                adInfo.videoAd = adInfo.downloadUrl.isVideo()
+                adInfo.fileName = it.name
+
+                adDao.insert(adInfo)
+            }
         }
 }

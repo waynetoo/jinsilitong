@@ -1,8 +1,6 @@
 package com.waynetoo.videotv.utils
 
-import android.content.Context
 import android.os.Environment
-import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.videotv.config.Constants
 import kotlinx.io.InputStream
 import java.io.BufferedReader
@@ -10,7 +8,7 @@ import java.io.File
 import java.io.InputStreamReader
 
 object USBUtils {
-
+    private var usbRoot: String = ""
     fun GetUsbPath(): String? {
         var strMountInfo = ""
         // 1.首先获得系统已加载的文件系统信息
@@ -123,5 +121,16 @@ object USBUtils {
             storeFile.mkdir()
         }
         return storeFile
+    }
+
+    /**
+     * 建立文件名称
+     */
+    fun createFilePath(fileName: String): String {
+//        if (usbRoot.isEmpty()) {
+//            val storeFile = File(Constants.usbFileRoot, Constants.USB_FILE_DIR)
+//            usbRoot = storeFile.absolutePath
+//        }
+        return Constants.usbFileRoot + File.separator + Constants.USB_FILE_DIR + File.separator + fileName
     }
 }

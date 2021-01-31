@@ -3,10 +3,6 @@ package com.waynetoo.videotv.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbManager
-import android.net.Uri
-import android.widget.Toast
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.videotv.config.Constants
 import java.io.File
@@ -20,16 +16,19 @@ import java.io.File
  */
 class USBBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val action = intent.action
-        when (action) {
+        when (intent.action) {
             Intent.ACTION_MEDIA_MOUNTED -> {
-//                context.toast("插入U盘:" + uri?.path)
+//                val oldPath = Constants.usbFileRoot
                 intent.data?.path?.let {
                     val usbRoot = File(it)
                     if (usbRoot.exists()) {
                         Constants.usbFileRoot = usbRoot.absolutePath
+//                        if (it != oldPath) {
+//                            context.toast("插入U盘,旧地址：$oldPath ->  新地址：$it")
+//                        } else {
+                        context.toast("插入U盘,$it")
+//                        }
                     }
-                    context.toast("插入U盘:" + usbRoot.absolutePath + "  U盘路径是否正确：" + usbRoot.exists())
                 }
             }
             Intent.ACTION_MEDIA_UNMOUNTED, Intent.ACTION_MEDIA_REMOVED -> {

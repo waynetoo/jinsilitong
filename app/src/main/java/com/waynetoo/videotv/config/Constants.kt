@@ -18,6 +18,7 @@ object Constants {
     var storeNo: String by Preference(AppContext, "storeNo", "")
 
     var usbFileRoot: String by Preference(AppContext, "usbFileRoot", "")
+    //保留前usb地址
 //    var usbFileRoot="/sdcard"
 
     const val USB_FILE_DIR = "jsltong"
