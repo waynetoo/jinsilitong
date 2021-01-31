@@ -2,19 +2,10 @@ package com.waynetoo.videotv.ui
 
 import android.Manifest
 import android.content.Intent
-import android.content.IntentFilter
-import android.hardware.usb.UsbManager
 import android.os.Bundle
-import android.os.Environment
-import android.os.Environment.*
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
-import com.liulishuo.okdownload.DownloadListener
-import com.liulishuo.okdownload.DownloadTask
-import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
-import com.liulishuo.okdownload.core.cause.EndCause
-import com.liulishuo.okdownload.core.cause.ResumeFailedCause
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.*
 import com.waynetoo.lib_common.lifecycle.BaseActivity
@@ -23,13 +14,10 @@ import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.presenter.BinderPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
 import com.waynetoo.videotv.room.AdDatabase
-import com.waynetoo.videotv.room.dao.AdDao
 import com.waynetoo.videotv.room.entity.AdInfo
-import com.waynetoo.videotv.utils.USBUtils
+import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_binder.*
 import kotlinx.coroutines.launch
-import java.io.File
-
 
 /**
  *
@@ -42,44 +30,30 @@ import java.io.File
 class InitActivity : BaseActivity<BinderPresenter>() {
     private val TAG = "waynetoo"
     private var usbBroadcastReceiver: USBBroadcastReceiver? = null
-    lateinit var adDao: AdDao
-
-    @Volatile
-    var updateCount: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_binder)
         initListeners()
-        registerReceiver()
-
+//        registerReceiver()
         checkPermissions(
             getString(R.string.storage_status_tips),
             {
-                USBUtils.initDownloadRoot(this@InitActivity)
-                checkStoreNo()
-//                toast(
-//                    " getFilesDir: " + getFilesDir() + " ...." +
-//                            " getCacheDir: " + getCacheDir() + " ...." +
-//                            " getExternalStorageDirectory: " + getExternalStorageDirectory() + " ...." +
-//                            " getExternalStoragePublicDirectory: " + getExternalStoragePublicDirectory(
-//                        DIRECTORY_MOVIES
-//                    ) + " ...."
-//                )
-
-//                toast( "USBpath.path:"+USBpath.path)
+//                USBUtils.initDownloadRoot(this@InitActivity)
+                checkStoreNoAndUsb()
             },
             { finish() },
             Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
         )
     }
 
-    private fun registerReceiver() {
-        usbBroadcastReceiver = USBBroadcastReceiver()
-        val usbDeviceStateFilter = IntentFilter()
-        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
-        registerReceiver(usbBroadcastReceiver, usbDeviceStateFilter)
-    }
+//    private fun registerReceiver() {
+//        usbBroadcastReceiver = USBBroadcastReceiver()
+//        val usbDeviceStateFilter = IntentFilter(Intent.ACTION_MEDIA_MOUNTED)
+//        usbDeviceStateFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED)
+//        usbDeviceStateFilter.addAction(Intent.ACTION_MEDIA_REMOVED)
+//        usbDeviceStateFilter.addDataScheme("file");//没有这行监听不起作用
+//        registerReceiver(usbBroadcastReceiver, usbDeviceStateFilter)
+//    }
 
     private fun initListeners() {
         btn_sure.setOnClickListener {
@@ -89,16 +63,23 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         }
     }
 
-    private fun checkStoreNo() {
-        Constants.storeNo.isEmpty().yes {
+    /**
+     * 检查门店和USB
+     */
+    private fun checkStoreNoAndUsb() {
+        if (Constants.storeNo.isEmpty()) {
             // 绑定no
             ll_binder.visibility = View.VISIBLE
             msg.visibility = View.GONE
             et_store_no.requestFocus()
             et_store_no.setText("320201215431")
-        }.otherwise {
-            ll_binder.visibility = View.GONE
-            msg.visibility = View.VISIBLE
+        } else if (!USBUtils.isUsbEnable()) {
+            toast(R.string.usb_notice)
+            ll_binder.visibility = View.VISIBLE
+            msg.visibility = View.GONE
+            btn_sure.requestFocus()
+            et_store_no.setText(Constants.storeNo)
+        } else {
             // 请求 广告列表
             presenter.getAdList()
         }
@@ -114,6 +95,8 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             toast(getString(R.string.login_tel_hint))
         } else if (et_store_no.text.toString().length != 12) {
             toast(R.string.store_id_number_illegal)
+        } else if (!USBUtils.isUsbEnable()) {
+            toast(R.string.usb_notice)
         } else {
             valid(et_store_no.text.toString())
         }
@@ -121,172 +104,48 @@ class InitActivity : BaseActivity<BinderPresenter>() {
 
     fun bindSuccess(storeNo: String) {
         Constants.storeNo = storeNo
-        checkStoreNo()
+        checkStoreNoAndUsb()
     }
 
     /**
      * 获取广告成功
      */
     fun getAdListSuccess(remoteList: List<AdInfo>) {
+        ll_binder.visibility = View.GONE
+        msg.visibility = View.VISIBLE
+        //播放列表
+        Constants.playAdList = remoteList
         if (remoteList.isEmpty()) {
             msg.text = "广告列表为空，请添加广告 。。"
             return
         }
-        adDao = AdDatabase.getDatabase(AppContext).adDao()
         launch {
             msg.text = "校验广告中。。。"
             showProgressDialog()
-            adDao.deletePathEmpty()
-            val localList = adDao.getAdList()
-            remoteList.forEach { remote ->
-                val find =
-                    localList.find { it.md5 == remote.md5 }
-                find?.let {
-                    remote.filePath = it.filePath
-                    remote.videoAd = it.videoAd
-                }
-            }
-//            println("localList " + localList)
-            //播放列表
-            Constants.playAdList = remoteList
-
+            syncLocal2Remote(remoteList)
             // 删除广告
-            deleteFiles(localList, remoteList, adDao)
+            deleteFiles(remoteList)
 
-            val updateList =
-                remoteList.filterNot { remote -> localList.any { it.md5 == remote.md5 } }
-            println("updateList" + updateList)
+            val updateList = getUpdateList(remoteList)
+            println("updateList$updateList")
             if (updateList.isEmpty()) {
                 startActivity(Intent(this@InitActivity, MainActivity::class.java))
                 finish()
             } else {
                 msg.text = "下载广告中。。。"
                 //更新列表
-                downloadFiles(updateList)
-            }
-        }
-    }
-
-    /**
-     * 删除文件
-     */
-    private suspend fun deleteFiles(
-        localList: List<AdInfo>,
-        remoteList: List<AdInfo>,
-        adDao: AdDao
-    ) {
-        val deleteList =
-            localList.filterNot { local -> remoteList.any { it.md5 == local.md5 } }
-        println("deleteList  $deleteList")
-        deleteList.forEach {
-            //删除数据库 和文件
-            adDao.delete(it)
-            File(it.filePath).delete()
-        }
-    }
-
-    /**
-     * 下载文件
-     */
-    private fun downloadFiles(updateList: List<AdInfo>) {
-        updateCount = updateList.size
-        val tasks: MutableList<DownloadTask> = ArrayList()
-        for (ad in updateList) {
-            val storeFile =  Constants.filesMovies
-
-            val task = DownloadTask.Builder(ad.downloadUrl, storeFile).build()
-            tasks.add(task)
-        }
-        DownloadTask.enqueue(tasks.toTypedArray(), downloadListener)  //同时异步执行多个任务
-    }
-
-    private val downloadListener: DownloadListener = object : DownloadListener {
-        override fun connectTrialEnd(
-            task: DownloadTask,
-            responseCode: Int,
-            responseHeaderFields: MutableMap<String, MutableList<String>>
-        ) {
-//            println("connectTrialEnd" +task.filename)
-        }
-
-        override fun fetchEnd(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-            println("fetchEnd" + task.filename)
-        }
-
-        override fun downloadFromBeginning(
-            task: DownloadTask,
-            info: BreakpointInfo,
-            cause: ResumeFailedCause
-        ) {
-            println("downloadFromBeginning" + task.filename)
-        }
-
-        override fun taskStart(task: DownloadTask) {
-//            println("taskStart"+task.filename)
-        }
-
-        override fun taskEnd(task: DownloadTask, cause: EndCause, realCause: Exception?) {
-            println("taskEnd2 " + task.file?.absolutePath)
-            //下载完成
-            if (cause == EndCause.COMPLETED) {
-                launch {
-                    Constants.playAdList.find { it.downloadUrl == task.url }
-                        ?.let {
-                            updateCount--
-                            it.filePath = task.file?.absolutePath ?: ""
-                            it.videoAd = it.downloadUrl.isVideo()
-                            adDao.insert(it)
-                        }
-                    toast(task.filename + " 下载成功," + "剩余 " + updateCount + "个")
-                    if (updateCount <= 0) {
-                        downloadSuccess()
+                DownloadFiles({ task, remainder ->
+                    launch {
+                        insertUpdateAd(Constants.playAdList, task)
+                        toast(task.filename + " 下载成功," + "剩余 " + remainder + "个")
                     }
-                }
+                }, {
+                    downloadSuccess()
+                }).downloadFiles(updateList)
             }
         }
-
-        override fun connectTrialStart(
-            task: DownloadTask,
-            requestHeaderFields: MutableMap<String, MutableList<String>>
-        ) {
-            println("connectTrialStart"+task.filename)
-//            this@InitActivity.toast("connectTrialStart  " + task.toString())
-        }
-
-        override fun downloadFromBreakpoint(task: DownloadTask, info: BreakpointInfo) {
-            println("downloadFromBreakpoint" + task.filename)
-        }
-
-        override fun fetchStart(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-            println("fetchStart" + task.filename)
-            this@InitActivity.toast("fetchStart" + task.toString())
-
-        }
-
-        override fun fetchProgress(task: DownloadTask, blockIndex: Int, increaseBytes: Long) {
-            println("fetchProgress" + task.filename)
-            this@InitActivity.toast("fetchProgress" + blockIndex.toString())
-        }
-
-        override fun connectEnd(
-            task: DownloadTask,
-            blockIndex: Int,
-            responseCode: Int,
-            responseHeaderFields: MutableMap<String, MutableList<String>>
-        ) {
-            println("connectEnd" + task.filename)
-        }
-
-        override fun connectStart(
-            task: DownloadTask,
-            blockIndex: Int,
-            requestHeaderFields: MutableMap<String, MutableList<String>>
-        ) {
-            println("connectStart" + task.filename)
-            this@InitActivity.toast("connectStart" + task.filename)
-
-        }
     }
+
 
     private fun downloadSuccess() {
         startActivity(Intent(this@InitActivity, MainActivity::class.java))
@@ -299,7 +158,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(usbBroadcastReceiver)
+//        unregisterReceiver(usbBroadcastReceiver)
     }
 
 

@@ -53,5 +53,6 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:textColor="@color/black"
-        android:textSize="32sp"></TextView>
+        android:textSize="32sp"
+        android:visibility="gone"></TextView>
 </RelativeLayout>

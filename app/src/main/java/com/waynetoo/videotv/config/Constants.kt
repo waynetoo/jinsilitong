@@ -17,6 +17,11 @@ object Constants {
     //门店ID
     var storeNo: String by Preference(AppContext, "storeNo", "")
 
+//    var usbFileRoot: String by Preference(AppContext, "usbFileRoot", "")
+    var usbFileRoot="/sdcard"
+
+    const val USB_FILE_DIR = "jsltong"
+
     // 设备唯一id
     var deviceId: String = ""
         get() {
@@ -35,7 +40,7 @@ object Constants {
      */
 //    val filesMovies = AppContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
 //    val filesPic = AppContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-    lateinit var filesMovies: File
+//    lateinit var filesMovies: File
 //    var filesPic = AppContext.cacheDir
 //    val filesMovies = File(Environment.getExternalStorageDirectory(), "movies")
 //    val filesPic = File(Environment.getExternalStorageDirectory(), "movies")

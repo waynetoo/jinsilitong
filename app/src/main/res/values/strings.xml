@@ -14,4 +14,5 @@
     <string name="login_register">新用户注册</string>
     <string name="resend_verify_code">重新获取{0}S</string>
     <string name="storage_status_tips">请允许访问您的存储权限</string>
+    <string name="usb_notice">请插入U盘或者重新插拔U盘</string>
 </resources>

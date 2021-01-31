@@ -102,14 +102,26 @@ object USBUtils {
         return lResult
     }
 
-    fun initDownloadRoot(context: Context) {
-        if (checkSDCard()) {
-            Constants.filesMovies =
-                context.getExternalFilesDir(Environment.DIRECTORY_MOVIES) ?: context.filesDir
-            context.toast("sdcard 可用：  "+Constants.filesMovies)
-        } else {
-            Constants.filesMovies = context.filesDir
-            context.toast("sdcard 不可用")
+//    fun initDownloadRoot(context: Context) {
+//        if (checkSDCard()) {
+////            Constants.filesMovies =
+////                context.getExternalFilesDir(Environment.DIRECTORY_MOVIES) ?: context.filesDir
+//            context.toast("sdcard 可用：  "+Constants.filesMovies)
+//        } else {
+////            Constants.filesMovies = context.filesDir
+//            context.toast("sdcard 不可用")
+//        }
+//    }
+
+    fun isUsbEnable(): Boolean {
+        return Constants.usbFileRoot.isNotEmpty() && File(Constants.usbFileRoot).exists()
+    }
+
+    fun createUsbDir(): File {
+        val storeFile = File(Constants.usbFileRoot, Constants.USB_FILE_DIR)
+        if (!storeFile.exists()) {
+            storeFile.mkdir()
         }
+        return storeFile
     }
 }

@@ -1,8 +1,6 @@
 package com.waynetoo.videotv.ui
 
 import android.content.Intent
-import android.content.IntentFilter
-import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -14,6 +12,7 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.Player
+import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
@@ -21,9 +20,13 @@ import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.mqtt.MyMqttService
 import com.waynetoo.videotv.presenter.MainPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
+import com.waynetoo.videotv.room.AdDatabase
 import com.waynetoo.videotv.room.entity.AdInfo
+import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
 
 
 class MainActivity : BaseActivity<MainPresenter>() {
@@ -84,7 +87,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
         initVideoComponent()
         initData()
         initMqtt()
-        registerReceiver()
+//        registerReceiver()
     }
 
     private fun initData() {
@@ -92,14 +95,14 @@ class MainActivity : BaseActivity<MainPresenter>() {
         currentPlay = playAdList[0]
         play(currentPlay)
     }
-
-    private fun registerReceiver() {
-        usbBroadcastReceiver = USBBroadcastReceiver()
-        val usbDeviceStateFilter = IntentFilter()
-        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
-        registerReceiver(usbBroadcastReceiver, usbDeviceStateFilter)
-    }
+//
+//    private fun registerReceiver() {
+//        usbBroadcastReceiver = USBBroadcastReceiver()
+//        val usbDeviceStateFilter = IntentFilter()
+//        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+//        usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+//        registerReceiver(usbBroadcastReceiver, usbDeviceStateFilter)
+//    }
 
     private fun initMqtt() {
         mIntent = Intent(this@MainActivity, MyMqttService::class.java)
@@ -113,7 +116,35 @@ class MainActivity : BaseActivity<MainPresenter>() {
     }
 
     fun getAdListSuccess(remoteList: List<AdInfo>) {
-        println(this)
+        if (remoteList.isEmpty()) {
+            toast("广告列表为空，请添加广告 。。")
+            startActivity(
+                Intent(this, InitActivity::class.java)
+            )
+            finish()
+            return
+        }
+        //播放列表
+        Constants.playAdList = remoteList
+        launch {
+            syncLocal2Remote(remoteList)
+            // 删除广告
+//            deleteFiles(remoteList)
+            val updateList = getUpdateList(remoteList)
+            println("updateList$updateList")
+            if (updateList.isNotEmpty()) {
+                toast("下载广告中。。。")
+                //更新列表
+                DownloadFiles({ task, remainder ->
+                    launch {
+                        insertUpdateAd(Constants.playAdList, task)
+                        toast(task.filename + " 下载成功," + "剩余 " + remainder + "个")
+                    }
+                }, {
+                    initData()
+                }).downloadFiles(updateList)
+            }
+        }
     }
 
     override fun onResume() {
@@ -147,22 +178,25 @@ class MainActivity : BaseActivity<MainPresenter>() {
     override fun onDestroy() {
         super.onDestroy()
         stopService(mIntent)
-        unregisterReceiver(usbBroadcastReceiver)
+//        unregisterReceiver(usbBroadcastReceiver)
     }
 
+    //播放下一个
     fun playNext(view: View) {
         playNext()
     }
 
     private fun playNext(isRestore: Boolean = false) {
-        if (!isRestore) {
-            val currentIndex = playAdList.indexOf(currentPlay)
-            val index = (currentIndex + 1) % playAdList.size
-            toast(index.toString())
-            currentPlay = playAdList[index]
-            currentPlay.currentPosition = 0L
+        if (playAdList.isNotEmpty()) {
+            if (!isRestore) {
+                val currentIndex = playAdList.indexOf(currentPlay)
+                val index = (currentIndex + 1) % playAdList.size
+//                toast(index.toString())
+                currentPlay = playAdList[index]
+                currentPlay.currentPosition = 0L
+            }
+            play(currentPlay)
         }
-        play(currentPlay)
     }
 
     /**
@@ -174,7 +208,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
             playerView.setSource(adInfo.filePath)
             playerView.start()
             playerView.seekTo(adInfo.currentPosition)
-            println("seekTo :"+adInfo.currentPosition)
+            println("seekTo :" + adInfo.currentPosition)
             if (!playerView.isVisible) {
                 playerView.visibility = View.VISIBLE
                 imageView.visibility = View.GONE
@@ -191,10 +225,11 @@ class MainActivity : BaseActivity<MainPresenter>() {
         }
     }
 
+    //接收扫码机信息
     fun scanCode(view: View) {
 //        6901028936477
 //        扫码 获得的code
-        val code = "6901028018722"
+        val code =   playAdList[(playAdList.indices).random() % playAdList.size].videoName
         handler.removeMessages(WHAT_INSERT_AD)
         val msg = Message.obtain()
         msg.what = WHAT_INSERT_AD
@@ -207,7 +242,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
     fun undateAd(view: View) {
         presenter.getAdList()
     }
-
 
     /**
      * 通过监听keyUp   实现双击返回键退出程序

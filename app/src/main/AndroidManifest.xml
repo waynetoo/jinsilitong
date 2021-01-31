@@ -18,15 +18,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <!-- 在SDCard中创建与删除文件权限 -->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
-    <!-- 往SDCard写入数据权限 -->
+    <!-- 往SDCard写入数据权限 --> <!-- 增加权限 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- 增加权限 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:name=".app.Application"
@@ -37,15 +37,6 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
-        <receiver
-            android:name=".receiver.BootReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter android:priority="1000">
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
 
         <activity
             android:name=".ui.MainActivity"
@@ -71,6 +62,38 @@
         <!-- Mqtt Service -->
         <service android:name="org.eclipse.paho.android.service.MqttService" />
         <service android:name=".mqtt.MyMqttService" />
-    </application>
 
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
+
+        <receiver android:name=".receiver.USBBroadcastReceiver">
+            <intent-filter>
+                <!-- 插入-->
+                <action android:name="android.intent.action.MEDIA_MOUNTED"/>
+                <!--拔出-->
+                <action android:name="android.intent.action.MEDIA_UNMOUNTED"/>
+                <!--完全拔出-->
+                <action android:name="android.intent.action.MEDIA_REMOVED"/>
+                <data android:scheme="file"/>
+            </intent-filter>
+        </receiver>
+    </application>
 </manifest>
