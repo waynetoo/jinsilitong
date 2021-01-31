@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.Player
-import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
@@ -20,13 +19,11 @@ import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.mqtt.MyMqttService
 import com.waynetoo.videotv.presenter.MainPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
-import com.waynetoo.videotv.room.AdDatabase
 import com.waynetoo.videotv.room.entity.AdInfo
 import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.*
 
 
 class MainActivity : BaseActivity<MainPresenter>() {
@@ -130,10 +127,18 @@ class MainActivity : BaseActivity<MainPresenter>() {
             syncLocal2Remote(remoteList)
             // 删除广告
 //            deleteFiles(remoteList)
-            val updateList = getUpdateList(remoteList)
+//            val updateList = getUpdateList(remoteList)
+            //与播放列表对比
+            val updateList =
+                remoteList.filterNot { remote -> playAdList.any { it.md5 == remote.md5 } }
+
             println("updateList$updateList")
             if (updateList.isNotEmpty()) {
-                toast("下载广告中。。。")
+                //图片不考察
+                if (playerView.isPlaying) {
+                    playerView.pause()
+                }
+                toast("下载更新中... 暂停播放...")
                 //更新列表
                 DownloadFiles({ task, remainder ->
                     launch {
@@ -229,7 +234,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
     fun scanCode(view: View) {
 //        6901028936477
 //        扫码 获得的code
-        val code =   playAdList[(playAdList.indices).random() % playAdList.size].videoName
+        val code = playAdList[(playAdList.indices).random() % playAdList.size].videoName
         handler.removeMessages(WHAT_INSERT_AD)
         val msg = Message.obtain()
         msg.what = WHAT_INSERT_AD
