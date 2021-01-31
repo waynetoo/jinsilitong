@@ -2,20 +2,23 @@ package com.waynetoo.videotv.utils
 
 import com.liulishuo.okdownload.DownloadListener
 import com.liulishuo.okdownload.DownloadTask
+import com.liulishuo.okdownload.OkDownload
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.cause.ResumeFailedCause
+import com.waynetoo.lib_common.AppContext
+import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.videotv.room.entity.AdInfo
 
 class DownloadFiles {
 
     @Volatile
     var updateCount: Int = 0
-    lateinit var itemSuccessCallback: (task: DownloadTask, remainder: Int) -> Unit
+    lateinit var itemSuccessCallback: (task: DownloadTask) -> Unit
     lateinit var complete: () -> Unit
 
     constructor(
-        callback: (task: DownloadTask, remainder: Int) -> Unit,
+        callback: (task: DownloadTask) -> Unit,
         complete: () -> Unit
     ) {
         this.itemSuccessCallback = callback
@@ -26,6 +29,8 @@ class DownloadFiles {
      * 下载文件
      */
     fun downloadFiles(updateList: List<AdInfo>) {
+        OkDownload.with().downloadDispatcher().cancelAll()
+
         updateCount = updateList.size
         val tasks: MutableList<DownloadTask> = ArrayList()
         val storeFile = USBUtils.createUsbDir()
@@ -43,7 +48,7 @@ class DownloadFiles {
             responseCode: Int,
             responseHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-//            println("connectTrialEnd" +task.filename)
+            println("connectTrialEnd" + task.filename)
         }
 
         override fun fetchEnd(task: DownloadTask, blockIndex: Int, contentLength: Long) {
@@ -63,10 +68,11 @@ class DownloadFiles {
         }
 
         override fun taskEnd(task: DownloadTask, cause: EndCause, realCause: Exception?) {
-            println("taskEnd " + task.file?.absolutePath)
             //下载完成
             if (cause == EndCause.COMPLETED) {
-                itemSuccessCallback.invoke(task, updateCount--)
+                --updateCount
+                itemSuccessCallback.invoke(task)
+                AppContext.toast(task.filename + " 下载成功," + "剩余 " + updateCount + "个")
                 if (updateCount <= 0) {
                     complete.invoke()
                 }
@@ -77,8 +83,6 @@ class DownloadFiles {
             task: DownloadTask,
             requestHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-            println("connectTrialStart  " + task.filename)
-//            this@InitActivity.toast("connectTrialStart  " + task.toString())
         }
 
         override fun downloadFromBreakpoint(task: DownloadTask, info: BreakpointInfo) {
@@ -87,12 +91,10 @@ class DownloadFiles {
 
         override fun fetchStart(task: DownloadTask, blockIndex: Int, contentLength: Long) {
             println("fetchStart" + task.filename)
-//            this@InitActivity.toast("fetchStart" + task.toString())
         }
 
         override fun fetchProgress(task: DownloadTask, blockIndex: Int, increaseBytes: Long) {
             println("fetchProgress" + task.filename)
-//            this@InitActivity.toast("fetchProgress" + blockIndex.toString())
         }
 
         override fun connectEnd(
@@ -110,7 +112,6 @@ class DownloadFiles {
             requestHeaderFields: MutableMap<String, MutableList<String>>
         ) {
             println("connectStart" + task.filename)
-//            this@InitActivity.toast("connectStart" + task.filename)
         }
     }
 }

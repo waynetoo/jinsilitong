@@ -33,7 +33,7 @@ object Constants {
         }
 
     //
-    var playAdList: List<AdInfo> = arrayListOf()
+    lateinit var playAdList: List<AdInfo>
 
     /**
      * 存放mp4  先检测外部存储，再检测内部存储

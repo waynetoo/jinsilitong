@@ -36,17 +36,15 @@ suspend fun fetchData(): String {
 /**
  * 删除文件
  */
-suspend fun deleteFiles(
-    remoteList: List<AdInfo>
-) = withContext(Dispatchers.IO) {
+suspend fun deleteFiles(remoteList: List<AdInfo>) {
     val adDao = AdDatabase.getDatabase(AppContext).adDao()
     val localList = adDao.getAdList()
     val deleteList =
         localList.filterNot { local -> remoteList.any { it.md5 == local.md5 } }
     println("deleteList  $deleteList")
+    adDao.deleteList(deleteList)
     deleteList.forEach {
         //删除数据库 和文件
-        adDao.delete(it)
         File(it.filePath).delete()
     }
 }
@@ -54,35 +52,35 @@ suspend fun deleteFiles(
 /**
  * 同步本地的path 2 Remote
  */
-suspend fun syncLocal2Remote(remoteList: List<AdInfo>) =
-    withContext(Dispatchers.IO) {
-        val adDao = AdDatabase.getDatabase(AppContext).adDao()
-        adDao.deletePathEmpty()
-        val localList = adDao.getAdList()
-        remoteList.forEach { remote ->
-            val find =
-                localList.find { it.md5 == remote.md5 }
-            find?.let {
+suspend fun syncLocal2Remote(remoteList: List<AdInfo>) {
+    val adDao = AdDatabase.getDatabase(AppContext).adDao()
+    adDao.deletePathEmpty()
+    val localList = adDao.getAdList()
+    println("syncLocal2Remote:" + localList)
+    remoteList.forEach { remote ->
+        localList.find { it.md5 == remote.md5 }
+            ?.let {
                 remote.filePath = it.filePath
                 remote.videoAd = it.videoAd
             }
+    }
+}
+
+suspend fun getUpdateList(remoteList: List<AdInfo>): List<AdInfo> {
+    val adDao = AdDatabase.getDatabase(AppContext).adDao()
+    val localList = adDao.getAdList()
+    println("getUpdateList:" + localList)
+    return remoteList.filterNot { remote -> localList.any { it.md5 == remote.md5 } }
+}
+
+suspend fun insertUpdateAd(playAdList: List<AdInfo>, task: DownloadTask) {
+    val adDao = AdDatabase.getDatabase(AppContext).adDao()
+    println("insertUpdateAd0:" + playAdList)
+    playAdList.find { it.downloadUrl == task.url }
+        ?.let {
+            it.filePath = task.file?.absolutePath ?: ""
+            it.videoAd = it.downloadUrl.isVideo()
+            adDao.insert(it)
+            println("insertUpdateAd1:" + it)
         }
-    }
-
-suspend fun getUpdateList(remoteList: List<AdInfo>) =
-    withContext(Dispatchers.IO) {
-        val adDao = AdDatabase.getDatabase(AppContext).adDao()
-        val localList = adDao.getAdList()
-        remoteList.filterNot { remote -> localList.any { it.md5 == remote.md5 } }
-    }
-
-suspend fun insertUpdateAd(playAdList: List<AdInfo>, task: DownloadTask) =
-    withContext(Dispatchers.IO) {
-        val adDao = AdDatabase.getDatabase(AppContext).adDao()
-        playAdList.find { it.downloadUrl == task.url }
-            ?.let {
-                it.filePath = task.file?.absolutePath ?: ""
-                it.videoAd = it.downloadUrl.isVideo()
-                adDao.insert(it)
-            }
-    }
+}

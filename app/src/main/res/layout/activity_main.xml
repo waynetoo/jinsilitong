@@ -25,6 +25,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
             android:layout_gravity="right|center_vertical"
             android:orientation="vertical">
 
@@ -43,7 +44,7 @@
                 android:layout_marginTop="50dp"
                 android:background="@drawable/selector_focus_btn"
                 android:onClick="scanCode"
-                android:text="播放扫码" />
+                android:text="播放扫码广告" />
 
             <Button
                 android:id="@+id/button4"
@@ -52,7 +53,7 @@
                 android:layout_marginTop="50dp"
                 android:background="@drawable/selector_focus_btn"
                 android:onClick="undateAd"
-                android:text="响应更新广告" />
+                android:text="更新广告" />
         </LinearLayout>
     </com.waynetoo.videotv.player.SimplePlayerView>
 

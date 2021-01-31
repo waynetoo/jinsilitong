@@ -23,6 +23,7 @@ import com.waynetoo.videotv.room.entity.AdInfo
 import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 
@@ -127,7 +128,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
             syncLocal2Remote(remoteList)
             // 删除广告
 //            deleteFiles(remoteList)
-//            val updateList = getUpdateList(remoteList)
             //与播放列表对比  远程有 ，播放列表没有
             val updateList =
                 remoteList.filterNot { remote -> playAdList.any { it.md5 == remote.md5 } }
@@ -143,10 +143,9 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 }
                 toast("下载更新中... 暂停播放...")
                 //更新列表
-                DownloadFiles({ task, remainder ->
-                    launch {
+                DownloadFiles({ task ->
+                    runBlocking {
                         insertUpdateAd(Constants.playAdList, task)
-                        toast(task.filename + " 下载成功," + "剩余 " + remainder + "个")
                     }
                 }, {
                     initData()
@@ -204,7 +203,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
             if (!isRestore) {
                 val currentIndex = playAdList.indexOf(currentPlay)
                 val index = (currentIndex + 1) % playAdList.size
-//                toast(index.toString())
+//                println(index.toString())
                 currentPlay = playAdList[index]
                 currentPlay.currentPosition = 0L
             }

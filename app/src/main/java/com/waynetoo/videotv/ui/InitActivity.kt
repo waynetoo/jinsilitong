@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
+import com.liulishuo.okdownload.OkDownload
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.*
 import com.waynetoo.lib_common.lifecycle.BaseActivity
@@ -17,7 +18,9 @@ import com.waynetoo.videotv.room.AdDatabase
 import com.waynetoo.videotv.room.entity.AdInfo
 import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_binder.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  *
@@ -134,10 +137,9 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             } else {
                 msg.text = "下载广告中。。。"
                 //更新列表
-                DownloadFiles({ task, remainder ->
-                    launch {
+                DownloadFiles({ task ->
+                    runBlocking {
                         insertUpdateAd(Constants.playAdList, task)
-                        toast(task.filename + " 下载成功," + "剩余 " + remainder + "个")
                     }
                 }, {
                     downloadSuccess()
