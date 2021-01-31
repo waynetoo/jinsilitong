@@ -55,7 +55,7 @@ suspend fun deleteFiles(
  * 同步本地的path 2 Remote
  */
 suspend fun syncLocal2Remote(remoteList: List<AdInfo>) =
-    withContext(Dispatchers.Default) {
+    withContext(Dispatchers.IO) {
         val adDao = AdDatabase.getDatabase(AppContext).adDao()
         adDao.deletePathEmpty()
         val localList = adDao.getAdList()
@@ -70,7 +70,7 @@ suspend fun syncLocal2Remote(remoteList: List<AdInfo>) =
     }
 
 suspend fun getUpdateList(remoteList: List<AdInfo>) =
-    withContext(Dispatchers.Default) {
+    withContext(Dispatchers.IO) {
         val adDao = AdDatabase.getDatabase(AppContext).adDao()
         val localList = adDao.getAdList()
         remoteList.filterNot { remote -> localList.any { it.md5 == remote.md5 } }

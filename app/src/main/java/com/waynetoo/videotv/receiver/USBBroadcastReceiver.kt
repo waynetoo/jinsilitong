@@ -23,19 +23,17 @@ class USBBroadcastReceiver : BroadcastReceiver() {
         val action = intent.action
         when (action) {
             Intent.ACTION_MEDIA_MOUNTED -> {
-                val uri: Uri? = intent.data
 //                context.toast("插入U盘:" + uri?.path)
-                uri?.let {
-                    val usbRoot = File(it.path)
+                intent.data?.path?.let {
+                    val usbRoot = File(it)
                     if (usbRoot.exists()) {
                         Constants.usbFileRoot = usbRoot.absolutePath
-                        context.toast("插入U盘:" + usbRoot.absolutePath + "  U盘路径是否正确：" + usbRoot.exists())
                     }
+                    context.toast("插入U盘:" + usbRoot.absolutePath + "  U盘路径是否正确：" + usbRoot.exists())
                 }
             }
             Intent.ACTION_MEDIA_UNMOUNTED, Intent.ACTION_MEDIA_REMOVED -> {
-                val uri: Uri? = intent.data
-//                context.toast("拔出：" + uri?.path)
+                context.toast("拔出：" + intent.data?.path)
             }
         }
     }
