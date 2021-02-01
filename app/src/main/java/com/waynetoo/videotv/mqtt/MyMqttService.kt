@@ -19,12 +19,13 @@ import org.eclipse.paho.client.mqttv3.*
 class MyMqttService : Service() {
     val TAG = MyMqttService::class.java.simpleName
     private var mMqttConnectOptions: MqttConnectOptions? = null
-    var HOST = "tcp://192.168.1.10:61613" //服务器地址（协议+地址+端口号）
+    var HOST = "tcp://39.99.150.10:61613" //服务器地址（协议+地址+端口号）
     var USERNAME = "admin" //用户名
     var PASSWORD = "password" //密码
 
-
-    val CLIENTID = Constants.deviceId
+    val CLIENTID by lazy {
+        Constants.deviceId
+    }
 //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Build.getSerial() else Build.SERIAL //客户端ID，一般以客户端唯一标识符表示，这里用设备序列号表示
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -65,6 +66,7 @@ class MyMqttService : Service() {
     private fun init() {
         val serverURI = HOST //服务器地址（协议+地址+端口号）
         mqttAndroidClient = MqttAndroidClient(this, serverURI, CLIENTID)
+        println("CLIENTID: $CLIENTID")
         mqttAndroidClient!!.setCallback(mqttCallback) //设置监听订阅消息的回调
         mMqttConnectOptions = MqttConnectOptions()
         mMqttConnectOptions!!.isCleanSession = true //设置是否清除缓存
@@ -141,7 +143,7 @@ class MyMqttService : Service() {
     //MQTT是否连接成功的监听
     private val iMqttActionListener: IMqttActionListener = object : IMqttActionListener {
         override fun onSuccess(arg0: IMqttToken) {
-            Log.i(TAG, "连接成功 ")
+            Log.i(TAG, "连接成功 subscribe -> $PUBLISH_TOPIC")
             try {
                 mqttAndroidClient?.subscribe(
                     PUBLISH_TOPIC,
@@ -174,7 +176,7 @@ class MyMqttService : Service() {
                 Toast.LENGTH_LONG
             ).show()
             //收到其他客户端的消息后，响应给对方告知消息已到达或者消息有问题等
-            response("message arrived")
+//            response("message arrived")
         }
 
         override fun deliveryComplete(arg0: IMqttDeliveryToken) {}
@@ -199,7 +201,9 @@ class MyMqttService : Service() {
 
     companion object {
         private var mqttAndroidClient: MqttAndroidClient? = null
-        var PUBLISH_TOPIC = "tourist_enter" //发布主题
+        val PUBLISH_TOPIC by lazy {
+            Constants.storeNo //发布主题
+        }
         var RESPONSE_TOPIC = "message_arrived" //响应主题
 
         /**

@@ -121,6 +121,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         launch {
             msg.text = "校验广告中。。。"
             showProgressDialog()
+
             // 删除广告
             deleteFiles(remoteList)
 

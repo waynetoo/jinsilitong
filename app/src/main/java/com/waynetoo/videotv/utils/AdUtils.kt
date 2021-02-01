@@ -4,12 +4,16 @@ import android.util.Log
 import com.liulishuo.okdownload.DownloadTask
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.isVideo
-import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.room.AdDatabase
-import com.waynetoo.videotv.room.dao.AdDao
 import com.waynetoo.videotv.room.entity.AdInfo
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileInputStream
+import java.math.BigInteger
+import java.security.MessageDigest
 
 /**
  * @Author: weiyunl
@@ -52,11 +56,21 @@ suspend fun deleteFiles(remoteList: List<AdInfo>) {
 
 /**
  * 同步本地的path 2 Remote
+ *
+ * 修改，同步本地的文件
  */
 suspend fun syncLocal2Remote(remoteList: List<AdInfo>) {
     val adDao = AdDatabase.getDatabase(AppContext).adDao()
     val localList = adDao.getAdList()
     println("syncLocal2Remote:" + localList)
+
+    val createUsbDir = USBUtils.createUsbDir()
+    createUsbDir.listFiles()?.forEach {
+        println(" begin md5 " + it.name + "   " + System.currentTimeMillis())
+        println(it.getFileMD5(16))
+        println(" end   md5 " + it.name + "   " + System.currentTimeMillis())
+    }
+
     remoteList.forEach { remote ->
         localList.find { it.md5 == remote.md5 }
             ?.let {
@@ -90,4 +104,67 @@ suspend fun insertUpdateAd(playAdList: List<AdInfo>, task: DownloadTask) {
                 adDao.insert(adInfo)
             }
         }
+}
+
+
+/**
+ * 获取单个文件的MD5值
+ * @param file 文件
+ * @param radix  位 16 32 64
+ *
+ * @return
+ */
+fun File.getFileMD5(radix: Int): String {
+    if (!isFile || !exists()) {
+        return ""
+    }
+    var digest: MessageDigest? = null
+    var `in`: FileInputStream? = null
+    val buffer = ByteArray(8192)
+    var len: Int = 0
+    try {
+        digest = MessageDigest.getInstance("MD5")
+        `in` = FileInputStream(this)
+        while (`in`.read(buffer, 0, 1024).also({ len = it }) != -1) {
+            digest.update(buffer, 0, len)
+        }
+        `in`.close()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return ""
+    }
+    val bigInt = BigInteger(1, digest.digest())
+    return bigInt.toString(radix)
+}
+
+/**
+ * 获取文件夹中文件的MD5值
+ *
+ * @param file
+ * @param listChild
+ * ;true递归子目录中的文件
+ * @return
+ */
+fun File.getDirMD5(
+    listChild: Boolean
+): Map<String, String>? {
+    if (!isDirectory) {
+        return null
+    }
+    val map: MutableMap<String, String> =
+        HashMap()
+    var md5: String?
+    val files = listFiles()
+    for (i in files.indices) {
+        val f = files[i]
+        if (f.isDirectory && listChild) {
+            map.putAll(f.getDirMD5(listChild)!!)
+        } else {
+            md5 = f.getFileMD5(16)
+            if (md5 != null) {
+                map[f.path] = md5
+            }
+        }
+    }
+    return map
 }

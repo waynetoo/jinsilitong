@@ -38,10 +38,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("waynetoo.jks")
-            storePassword "123789"
-            keyAlias "key"
-            keyPassword "123789"
+            keyAlias 'zjs'
+            keyPassword '123456'
+            storePassword '123456'
+            storeFile file('zjs.jks')
         }
     }
     buildTypes {
