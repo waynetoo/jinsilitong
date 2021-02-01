@@ -12,11 +12,10 @@ import com.waynetoo.videotv.R
 import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.presenter.BinderPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
-import com.waynetoo.videotv.room.entity.AdInfo
+import com.waynetoo.videotv.model.AdInfo
 import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_binder.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  *
@@ -122,15 +121,10 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             msg.text = "校验广告中。。。"
             showProgressDialog()
 
+            val localFiles = getLocalFiles()
+            val updateList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
             // 删除广告
-            deleteFiles(remoteList)
-
-            syncLocal2Remote(remoteList)
-
-            val updateList = getUpdateList(remoteList)
-//            println("updateList$updateList")
-//            toast("playAdList 1:"+Constants.playAdList)
-//            println("Constants.playAdList:"+Constants.playAdList)
+            deleteFiles(localFiles, remoteList)
 
             if (updateList.isEmpty()) {
                 startActivity(Intent(this@InitActivity, MainActivity::class.java))
@@ -139,9 +133,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
                 msg.text = "下载广告中。。。"
                 //更新列表
                 DownloadFiles({ task ->
-                    runBlocking {
-                        insertUpdateAd(Constants.playAdList, task)
-                    }
+                    insertUpdateAd(updateList, task)
                 }, {
                     downloadSuccess()
                 }).downloadFiles(updateList)

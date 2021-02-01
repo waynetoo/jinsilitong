@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.Player
+import com.waynetoo.lib_common.extentions.isVideo
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
@@ -19,11 +20,8 @@ import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.mqtt.MyMqttService
 import com.waynetoo.videotv.presenter.MainPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
-import com.waynetoo.videotv.room.entity.AdInfo
-import com.waynetoo.videotv.utils.DownloadFiles
-import com.waynetoo.videotv.utils.USBUtils
-import com.waynetoo.videotv.utils.insertUpdateAd
-import com.waynetoo.videotv.utils.syncLocal2Remote
+import com.waynetoo.videotv.model.AdInfo
+import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -87,7 +85,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
         setContentView(R.layout.activity_main)
         initVideoComponent()
         initData()
-        initMqtt()
+
 //        registerReceiver()
     }
 
@@ -128,12 +126,12 @@ class MainActivity : BaseActivity<MainPresenter>() {
         //播放列表
         Constants.playAdList = remoteList
         launch {
-            syncLocal2Remote(remoteList)
+
+            val localFiles = getLocalFiles()
+            //与播放列表对比  远程有 ，播放列表没有
+            val updateList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
             // 删除广告
 //            deleteFiles(remoteList)
-            //与播放列表对比  远程有 ，播放列表没有
-            val updateList =
-                remoteList.filterNot { remote -> playAdList.any { it.md5 == remote.md5 } }
 
             //播放列表有,远程没有
             val updatePlayList =
@@ -164,6 +162,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     override fun onResume() {
         super.onResume()
+        initMqtt()
     }
 
     private fun initVideoComponent() {
@@ -190,9 +189,13 @@ class MainActivity : BaseActivity<MainPresenter>() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        stopService(mIntent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        stopService(mIntent)
 //        unregisterReceiver(usbBroadcastReceiver)
     }
 
@@ -220,7 +223,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
     private fun play(adInfo: AdInfo) {
 //        println("play :" + USBUtils.createFilePath(adInfo.fileName))
 //        toast("play :" + USBUtils.createFilePath(adInfo.fileName))
-        if (adInfo.videoAd) {
+        if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo.fileName))
             playerView.start()
             playerView.seekTo(adInfo.currentPosition)

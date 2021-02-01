@@ -8,7 +8,7 @@ import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.cause.ResumeFailedCause
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.toast
-import com.waynetoo.videotv.room.entity.AdInfo
+import com.waynetoo.videotv.model.AdInfo
 
 class DownloadFiles {
 
@@ -35,7 +35,12 @@ class DownloadFiles {
         val tasks: MutableList<DownloadTask> = ArrayList()
         val storeFile = USBUtils.createUsbDir()
         for (ad in updateList) {
-            val task = DownloadTask.Builder(ad.downloadUrl, storeFile).build()
+            val task = DownloadTask.Builder(ad.downloadUrl, storeFile)
+                .setMinIntervalMillisCallbackProcess(6_000)
+                .setReadBufferSize(8192)
+                .setFlushBufferSize(32768)
+                .setPreAllocateLength(true)
+                .build()
             tasks.add(task)
         }
         DownloadTask.enqueue(tasks.toTypedArray(), downloadListener)  //同时异步执行多个任务
@@ -48,11 +53,11 @@ class DownloadFiles {
             responseCode: Int,
             responseHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-//            println("connectTrialEnd" + task.filename)
+            println("connectTrialEnd" + task.filename)
         }
 
         override fun fetchEnd(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-//            println("fetchEnd " + task.filename)
+            println("fetchEnd " + task.filename)
         }
 
         override fun downloadFromBeginning(
@@ -60,11 +65,11 @@ class DownloadFiles {
             info: BreakpointInfo,
             cause: ResumeFailedCause
         ) {
-//            println("downloadFromBeginning " + task.filename)
+            println("downloadFromBeginning " + task.filename)
         }
 
         override fun taskStart(task: DownloadTask) {
-//            println("taskStart"+task.filename)
+            println("taskStart"+task.filename)
         }
 
         override fun taskEnd(task: DownloadTask, cause: EndCause, realCause: Exception?) {
@@ -86,15 +91,15 @@ class DownloadFiles {
         }
 
         override fun downloadFromBreakpoint(task: DownloadTask, info: BreakpointInfo) {
-//            println("downloadFromBreakpoint " + task.filename)
+            println("downloadFromBreakpoint " + task.filename)
         }
 
         override fun fetchStart(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-//            println("fetchStart" + task.filename)
+            println("fetchStart" + task.filename)
         }
 
         override fun fetchProgress(task: DownloadTask, blockIndex: Int, increaseBytes: Long) {
-//            println("fetchProgress" + task.filename)
+            println("fetchProgress" + task.filename)
         }
 
         override fun connectEnd(
@@ -103,7 +108,7 @@ class DownloadFiles {
             responseCode: Int,
             responseHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-//            println("connectEnd" + task.filename)
+            println("connectEnd" + task.filename)
         }
 
         override fun connectStart(
@@ -111,7 +116,7 @@ class DownloadFiles {
             blockIndex: Int,
             requestHeaderFields: MutableMap<String, MutableList<String>>
         ) {
-//            println("connectStart" + task.filename)
+            println("connectStart" + task.filename)
         }
     }
 }

@@ -1,7 +1,5 @@
 package com.waynetoo.videotv.repository
 
-import com.waynetoo.lib_common.extentions.resettableLazy
-import com.waynetoo.lib_common.extentions.resettableManager
 import com.waynetoo.lib_common.extentions.yes
 import com.waynetoo.lib_common.net.buildCommonClient
 import com.waynetoo.lib_common.net.builder
@@ -9,7 +7,7 @@ import com.waynetoo.lib_common.net.handleUniformError
 import com.waynetoo.videotv.config.Constants
 import com.waynetoo.videotv.model.BaseModel
 import com.waynetoo.videotv.model.Store
-import com.waynetoo.videotv.room.entity.AdInfo
+import com.waynetoo.videotv.model.AdInfo
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver

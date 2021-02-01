@@ -19,12 +19,6 @@ android {
             //设置支持的SO库架构
             abiFilters 'armeabi-v7a' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
         }
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += ["room.schemaLocation":
-                                      "$projectDir/schemas".toString()]
-            }
-        }
     }
 
     compileOptions {
@@ -38,10 +32,10 @@ android {
 
     signingConfigs {
         release {
-            keyAlias 'zjs'
-            keyPassword '123456'
-            storePassword '123456'
-            storeFile file('zjs.jks')
+            storeFile file("waynetoo.jks")
+            storePassword "123789"
+            keyAlias "key"
+            keyPassword "123789"
         }
     }
     buildTypes {
@@ -60,6 +54,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    android.applicationVariants.all {
+        variant ->
+            variant.outputs.all {
+                outputFileName = "jslt_${variant.name}_v${variant.versionName}_${releaseTime()}.apk"
+            }
+    }
+}
+
+def releaseTime() {
+    return new Date().format("yyMMdd", TimeZone.getTimeZone("UTC"))
 }
 
 dependencies {
@@ -72,5 +77,4 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     implementation 'com.google.android.exoplayer:exoplayer:2.10.4'
     implementation project(path: ':lib_common')
-    implementation 'com.github.mjdev:libaums:0.5.5'
 }
