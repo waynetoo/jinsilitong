@@ -9,18 +9,21 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.Nullable
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.Player
+import com.jeremyliao.liveeventbus.LiveEventBus
 import com.waynetoo.lib_common.extentions.isVideo
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
 import com.waynetoo.videotv.config.Constants
+import com.waynetoo.videotv.model.AdInfo
 import com.waynetoo.videotv.mqtt.MyMqttService
 import com.waynetoo.videotv.presenter.MainPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
-import com.waynetoo.videotv.model.AdInfo
 import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
@@ -85,8 +88,16 @@ class MainActivity : BaseActivity<MainPresenter>() {
         setContentView(R.layout.activity_main)
         initVideoComponent()
         initData()
-
+        initObserve()
 //        registerReceiver()
+    }
+
+    private fun initObserve() {
+        LiveEventBus
+            .get("LV_RECEIVE_MSG", String::class.java)
+            .observe(this, Observer<String> {
+                toast(it)
+            })
     }
 
     private fun initData() {

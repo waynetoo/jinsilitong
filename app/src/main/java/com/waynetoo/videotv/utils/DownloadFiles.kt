@@ -3,9 +3,13 @@ package com.waynetoo.videotv.utils
 import com.liulishuo.okdownload.DownloadListener
 import com.liulishuo.okdownload.DownloadTask
 import com.liulishuo.okdownload.OkDownload
+import com.liulishuo.okdownload.SpeedCalculator
+import com.liulishuo.okdownload.core.breakpoint.BlockInfo
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.cause.ResumeFailedCause
+import com.liulishuo.okdownload.core.listener.DownloadListener4WithSpeed
+import com.liulishuo.okdownload.core.listener.assist.Listener4SpeedAssistExtend
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.videotv.model.AdInfo
@@ -36,9 +40,10 @@ class DownloadFiles {
         val storeFile = USBUtils.createUsbDir()
         for (ad in updateList) {
             val task = DownloadTask.Builder(ad.downloadUrl, storeFile)
-                .setMinIntervalMillisCallbackProcess(6_000)
-                .setReadBufferSize(8192)
-                .setFlushBufferSize(32768)
+                .setMinIntervalMillisCallbackProcess(5_000)
+                .setReadBufferSize(1024 * 8)
+                .setFlushBufferSize(1024 * 32)
+                .setSyncBufferSize(1024 * 64)
                 .setPreAllocateLength(true)
                 .build()
             tasks.add(task)
@@ -47,76 +52,81 @@ class DownloadFiles {
     }
 
 
-    private val downloadListener: DownloadListener = object : DownloadListener {
-        override fun connectTrialEnd(
-            task: DownloadTask,
-            responseCode: Int,
-            responseHeaderFields: MutableMap<String, MutableList<String>>
-        ) {
-            println("connectTrialEnd" + task.filename)
-        }
+    private val downloadListener: DownloadListener4WithSpeed =
+        object : DownloadListener4WithSpeed() {
 
-        override fun fetchEnd(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-            println("fetchEnd " + task.filename)
-        }
+            override fun taskStart(task: DownloadTask) {
+                println("taskStart=>" + task.filename)
+            }
 
-        override fun downloadFromBeginning(
-            task: DownloadTask,
-            info: BreakpointInfo,
-            cause: ResumeFailedCause
-        ) {
-            println("downloadFromBeginning " + task.filename)
-        }
+            override fun blockEnd(
+                task: DownloadTask,
+                blockIndex: Int,
+                info: BlockInfo?,
+                blockSpeed: SpeedCalculator
+            ) {
+                println("blockEnd=>" + task.filename)
+            }
 
-        override fun taskStart(task: DownloadTask) {
-            println("taskStart"+task.filename)
-        }
-
-        override fun taskEnd(task: DownloadTask, cause: EndCause, realCause: Exception?) {
-            //下载完成
-            if (cause == EndCause.COMPLETED) {
-                --updateCount
-                itemSuccessCallback.invoke(task)
-                AppContext.toast(task.filename + " 下载成功," + "剩余 " + updateCount + "个")
-                if (updateCount <= 0) {
-                    complete.invoke()
+            override fun taskEnd(
+                task: DownloadTask,
+                cause: EndCause,
+                realCause: java.lang.Exception?,
+                taskSpeed: SpeedCalculator
+            ) {
+                println("taskEnd=>" + task.filename)
+                //下载完成
+                if (cause == EndCause.COMPLETED) {
+                    --updateCount
+                    itemSuccessCallback.invoke(task)
+                    AppContext.toast(task.filename + " 下载成功," + "剩余 " + updateCount + "个")
+                    if (updateCount <= 0) {
+                        complete.invoke()
+                    }
                 }
             }
-        }
 
-        override fun connectTrialStart(
-            task: DownloadTask,
-            requestHeaderFields: MutableMap<String, MutableList<String>>
-        ) {
-        }
+            override fun progress(
+                task: DownloadTask,
+                currentOffset: Long,
+                taskSpeed: SpeedCalculator
+            ) {
+                println("progress=>" + task.filename + "  " + currentOffset)
+            }
 
-        override fun downloadFromBreakpoint(task: DownloadTask, info: BreakpointInfo) {
-            println("downloadFromBreakpoint " + task.filename)
-        }
+            override fun connectEnd(
+                task: DownloadTask,
+                blockIndex: Int,
+                responseCode: Int,
+                responseHeaderFields: MutableMap<String, MutableList<String>>
+            ) {
+//                println("connectEnd=>" + task.filename)
+            }
 
-        override fun fetchStart(task: DownloadTask, blockIndex: Int, contentLength: Long) {
-            println("fetchStart" + task.filename)
-        }
+            override fun connectStart(
+                task: DownloadTask,
+                blockIndex: Int,
+                requestHeaderFields: MutableMap<String, MutableList<String>>
+            ) {
+//                println("connectStart=>" + task.filename)
+            }
 
-        override fun fetchProgress(task: DownloadTask, blockIndex: Int, increaseBytes: Long) {
-            println("fetchProgress" + task.filename)
-        }
+            override fun infoReady(
+                task: DownloadTask,
+                info: BreakpointInfo,
+                fromBreakpoint: Boolean,
+                model: Listener4SpeedAssistExtend.Listener4SpeedModel
+            ) {
+                println("infoReady=>" + task.filename)
+            }
 
-        override fun connectEnd(
-            task: DownloadTask,
-            blockIndex: Int,
-            responseCode: Int,
-            responseHeaderFields: MutableMap<String, MutableList<String>>
-        ) {
-            println("connectEnd" + task.filename)
+            override fun progressBlock(
+                task: DownloadTask,
+                blockIndex: Int,
+                currentBlockOffset: Long,
+                blockSpeed: SpeedCalculator
+            ) {
+                println("progressBlock=>" + task.filename)
+            }
         }
-
-        override fun connectStart(
-            task: DownloadTask,
-            blockIndex: Int,
-            requestHeaderFields: MutableMap<String, MutableList<String>>
-        ) {
-            println("connectStart" + task.filename)
-        }
-    }
 }

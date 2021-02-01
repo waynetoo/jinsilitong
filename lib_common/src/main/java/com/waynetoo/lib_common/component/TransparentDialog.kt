@@ -28,5 +28,17 @@ class TransparentDialog : androidx.fragment.app.DialogFragment() {
         dialog!!.window!!.attributes = params
     }
 
+    // 防止 Fragment already added 异常
+    override fun show(manager: androidx.fragment.app.FragmentManager, tag: String?) {
+        try {
+            //在每个add事务前增加一个remove事务，防止连续的add
+            manager?.beginTransaction()?.remove(this)?.add(this, tag)?.commitAllowingStateLoss()
+//            super.show(manager, tag)
+        } catch (e: Exception) {
+            //同一实例使用不同的tag会异常,这里捕获一下
+            e.printStackTrace()
+        }
+    }
+
     fun show(fm: androidx.fragment.app.FragmentManager) = show(fm, "transparent_progress_dialog")
 }

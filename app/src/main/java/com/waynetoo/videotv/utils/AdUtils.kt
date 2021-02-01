@@ -8,7 +8,10 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileInputStream
 import java.math.BigInteger
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 import java.security.MessageDigest
+import kotlin.experimental.and
 
 /**
  * @Author: weiyunl
@@ -44,6 +47,7 @@ suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
             )
         )
     }
+    println("localFiles :$localList")
     localList
 }
 
@@ -81,6 +85,7 @@ suspend fun syncLocal2RemoteAndObtainUpdateList(
                 remote.setData(find)
             }
         }
+        println("updateList：$updateList")
         updateList
     }
 
@@ -113,7 +118,7 @@ fun File.fileMd5(): String {
     try {
         digest = MessageDigest.getInstance("MD5")
         `in` = FileInputStream(this)
-        while (`in`.read(buffer, 0, 1024).also({ len = it }) != -1) {
+        while (`in`.read(buffer, 0, 2048).also { len = it } != -1) {
             digest.update(buffer, 0, len)
         }
         `in`.close()
@@ -122,10 +127,14 @@ fun File.fileMd5(): String {
         return ""
     }
     val bigInt = BigInteger(1, digest.digest())
-    val md5 = bigInt.toString(16)
+    var md5 = bigInt.toString(16)
+    while (md5.length < 32) {
+        md5 = "0$md5"
+    }
     println("end md5 " + name + " ->" + md5 + "  " + System.currentTimeMillis())
     return md5
 }
+
 
 /**
  * 获取文件夹中文件的MD5值

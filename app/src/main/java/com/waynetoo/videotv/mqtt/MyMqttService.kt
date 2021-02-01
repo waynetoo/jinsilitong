@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.Nullable
+import com.jeremyliao.liveeventbus.LiveEventBus
 import com.waynetoo.videotv.config.Constants
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
@@ -170,11 +171,14 @@ class MyMqttService : Service() {
         ) {
             Log.i(TAG, "收到消息： " + String(message.payload))
             //收到消息，这里弹出Toast表示。如果需要更新UI，可以使用广播或者EventBus进行发送
-            Toast.makeText(
-                applicationContext,
-                "messageArrived: " + String(message.payload),
-                Toast.LENGTH_LONG
-            ).show()
+//            Toast.makeText(
+//                applicationContext,
+//                "messageArrived: " + String(message.payload),
+//                Toast.LENGTH_LONG
+//            ).show()
+            LiveEventBus
+                .get(LV_RECEIVE_MSG)
+                .post(String(message.payload))
             //收到其他客户端的消息后，响应给对方告知消息已到达或者消息有问题等
 //            response("message arrived")
         }
@@ -205,6 +209,7 @@ class MyMqttService : Service() {
             Constants.storeNo //发布主题
         }
         var RESPONSE_TOPIC = "message_arrived" //响应主题
+        const val LV_RECEIVE_MSG = "LV_RECEIVE_MSG" //响应主题
 
         /**
          * 发布 （模拟其他客户端发布消息）

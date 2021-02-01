@@ -28,7 +28,7 @@ abstract class BaseActivity<out P : BasePresenter<BaseActivity<P>>> : IMvpView<P
         presenter.view = this
     }
 
-    protected val pDialog by lazy {
+    private val pDialog by lazy {
         TransparentDialog()
     }
 
