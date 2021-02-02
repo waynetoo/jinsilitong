@@ -243,7 +243,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
      * 播放
      */
     private fun play(adInfo: AdInfo) {
-//        println("play :" + USBUtils.createFilePath(adInfo.fileName))
+        println("play :" + adInfo.fileName)
 //        toast("play :" + USBUtils.createFilePath(adInfo.fileName))
         if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo.fileName))
