@@ -1,18 +1,14 @@
 package com.waynetoo.videotv.utils
 
-import androidx.annotation.NonNull
 import com.liulishuo.okdownload.DownloadTask
 import com.liulishuo.okdownload.OkDownload
 import com.liulishuo.okdownload.SpeedCalculator
-import com.liulishuo.okdownload.core.Util
 import com.liulishuo.okdownload.core.breakpoint.BlockInfo
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.connection.DownloadOkHttp3Connection
 import com.liulishuo.okdownload.core.dispatcher.DownloadDispatcher
-import com.liulishuo.okdownload.core.listener.DownloadListener4
 import com.liulishuo.okdownload.core.listener.DownloadListener4WithSpeed
-import com.liulishuo.okdownload.core.listener.assist.Listener4Assist
 import com.liulishuo.okdownload.core.listener.assist.Listener4SpeedAssistExtend
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.toast
@@ -27,20 +23,6 @@ class DownloadFiles {
     lateinit var itemSuccessCallback: (task: DownloadTask) -> Unit
     lateinit var complete: () -> Unit
     var progressCallback: ((String) -> Unit)? = null
-
-    init {
-        val DEFAULT_TIMEOUT = 60L
-        val downLoaderFactory = DownloadOkHttp3Connection.Factory().setBuilder(
-            OkHttpClient.Builder()
-                .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-        )
-        val builder = OkDownload.Builder(AppContext)
-            .connectionFactory(downLoaderFactory)
-        OkDownload.setSingletonInstance(builder.build())
-        DownloadDispatcher.setMaxParallelRunningCount(1)
-    }
 
     constructor(
         callback: (task: DownloadTask) -> Unit,

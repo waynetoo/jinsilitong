@@ -4,6 +4,7 @@
     <!-- 登录 -->
     <string name="login_tel">手机号码</string>
     <string name="login_tel_hint">请输入门店Id</string>
+    <string name="net_err">网络异常，请检查网络</string>
     <string name="store_id_number_illegal">请输入正确的门店Id</string>
     <string name="login_pwd">密码</string>
     <string name="login_pwd_hint">请输入密码</string>

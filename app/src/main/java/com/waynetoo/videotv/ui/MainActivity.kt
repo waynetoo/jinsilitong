@@ -193,6 +193,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
             initPlayer()
             playerCallback = { playWhenReady, state ->
                 if (state == Player.STATE_ENDED) {  // 播放结束
+                    println("playerCallback  播放结束" + currentPlay.fileName)
                     if (isInsertAd) {
                         isInsertAd = false
                         playNext(true)
@@ -201,9 +202,9 @@ class MainActivity : BaseActivity<MainPresenter>() {
                     }
                 } else {
                     if (state == Player.STATE_READY && playWhenReady) {  // 播放中
-//                        println("playerCallback  播放中")
+                        println("playerCallback  播放中")
                     } else if (state == Player.STATE_READY && !playWhenReady) {  // 暂停中
-//                        println("playerCallback  暂停中")
+                        println("playerCallback  暂停中")
                         //?
                     }
                 }

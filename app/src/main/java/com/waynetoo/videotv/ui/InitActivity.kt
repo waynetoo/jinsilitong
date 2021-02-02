@@ -89,7 +89,9 @@ class InitActivity : BaseActivity<BinderPresenter>() {
     }
 
     private fun checkInput(valid: (id: String) -> Unit) {
-        if (et_store_no.text.isNullOrBlank()) {
+        if(!isConnectIsNormal){
+            toast(getString(R.string.net_err))
+        }else  if (et_store_no.text.isNullOrBlank()) {
             toast(getString(R.string.login_tel_hint))
         } else if (et_store_no.text.toString().length != 12) {
             toast(R.string.store_id_number_illegal)
