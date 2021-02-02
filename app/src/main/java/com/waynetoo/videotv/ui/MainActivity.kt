@@ -306,7 +306,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 return true
             } else {
                 finish()
-                System.exit(0)
             }
         }
         return super.onKeyUp(keyCode, event)

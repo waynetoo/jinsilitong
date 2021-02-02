@@ -136,6 +136,8 @@ class InitActivity : BaseActivity<BinderPresenter>() {
                     insertUpdateAd(updateList, task)
                 }, {
                     downloadSuccess()
+                }, {
+                    progress.text = it
                 }).downloadFiles(updateList)
             }
         }

@@ -1,15 +1,15 @@
 package com.waynetoo.videotv.utils
 
-import com.liulishuo.okdownload.DownloadListener
+import androidx.annotation.NonNull
 import com.liulishuo.okdownload.DownloadTask
 import com.liulishuo.okdownload.OkDownload
 import com.liulishuo.okdownload.SpeedCalculator
+import com.liulishuo.okdownload.core.Util
 import com.liulishuo.okdownload.core.breakpoint.BlockInfo
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
-import com.liulishuo.okdownload.core.cause.ResumeFailedCause
-import com.liulishuo.okdownload.core.connection.DownloadConnection
 import com.liulishuo.okdownload.core.connection.DownloadOkHttp3Connection
+import com.liulishuo.okdownload.core.dispatcher.DownloadDispatcher
 import com.liulishuo.okdownload.core.listener.DownloadListener4
 import com.liulishuo.okdownload.core.listener.DownloadListener4WithSpeed
 import com.liulishuo.okdownload.core.listener.assist.Listener4Assist
@@ -18,7 +18,6 @@ import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.videotv.model.AdInfo
 import okhttp3.OkHttpClient
-import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
 class DownloadFiles {
@@ -27,6 +26,21 @@ class DownloadFiles {
     var updateCount: Int = 0
     lateinit var itemSuccessCallback: (task: DownloadTask) -> Unit
     lateinit var complete: () -> Unit
+    var progressCallback: ((String) -> Unit)? = null
+
+    init {
+        val DEFAULT_TIMEOUT = 60L
+        val downLoaderFactory = DownloadOkHttp3Connection.Factory().setBuilder(
+            OkHttpClient.Builder()
+                .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+        )
+        val builder = OkDownload.Builder(AppContext)
+            .connectionFactory(downLoaderFactory)
+        OkDownload.setSingletonInstance(builder.build())
+        DownloadDispatcher.setMaxParallelRunningCount(1)
+    }
 
     constructor(
         callback: (task: DownloadTask) -> Unit,
@@ -34,38 +48,32 @@ class DownloadFiles {
     ) {
         this.itemSuccessCallback = callback
         this.complete = complete
-        val downLoaderFactory = DownloadOkHttp3Connection.Factory().setBuilder(
-            OkHttpClient.Builder()
-                .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-        )
-        val builer = OkDownload.Builder(AppContext)
-            .connectionFactory(downLoaderFactory)
-        OkDownload.setSingletonInstance(builer.build())
     }
 
-    private val DEFAULT_TIMEOUT = 60L
+    constructor(
+        callback: (task: DownloadTask) -> Unit,
+        complete: () -> Unit,
+        progressCallback: (msg: String) -> Unit
+    ) {
+        this.itemSuccessCallback = callback
+        this.complete = complete
+        this.progressCallback = progressCallback
+    }
+
 
     /**
      * 下载文件
      */
     fun downloadFiles(updateList: List<AdInfo>) {
-
-        OkDownload.with()
-            .downloadDispatcher().cancelAll()
-
-
         updateCount = updateList.size
         val tasks: MutableList<DownloadTask> = ArrayList()
         val storeFile = USBUtils.createUsbDir()
         for (ad in updateList) {
             val task = DownloadTask.Builder(ad.downloadUrl, storeFile)
-//                .setMinIntervalMillisCallbackProcess(5_000)
 //                .setReadBufferSize(1024 * 8)
 //                .setFlushBufferSize(1024 * 32)
 //                .setSyncBufferSize(1024 * 64)
-//                .setConnectionCount(5)
+                .setConnectionCount(5)
                 .build()
             tasks.add(task)
         }
@@ -73,22 +81,27 @@ class DownloadFiles {
     }
 
 
-    private val downloadListener: DownloadListener4 =
-        object : DownloadListener4() {
+    private val downloadListener: DownloadListener4WithSpeed =
+        object : DownloadListener4WithSpeed() {
 
             override fun taskStart(task: DownloadTask) {
                 println("taskStart=>" + task.filename)
             }
 
-            override fun blockEnd(task: DownloadTask, blockIndex: Int, info: BlockInfo?) {
+            override fun blockEnd(
+                task: DownloadTask,
+                blockIndex: Int,
+                info: BlockInfo?,
+                blockSpeed: SpeedCalculator
+            ) {
                 println("blockEnd=>" + task.filename)
             }
 
             override fun taskEnd(
                 task: DownloadTask,
-                cause: EndCause?,
-                realCause: Exception?,
-                model: Listener4Assist.Listener4Model
+                cause: EndCause,
+                realCause: java.lang.Exception?,
+                taskSpeed: SpeedCalculator
             ) {
                 println("taskEnd=>" + task.filename + " cause=" + cause)
                 //下载完成
@@ -104,8 +117,22 @@ class DownloadFiles {
                 }
             }
 
-            override fun progress(task: DownloadTask, currentOffset: Long) {
-                println("progress=>" + task.filename + "  " + currentOffset)
+            override fun progress(
+                task: DownloadTask,
+                currentOffset: Long,
+                taskSpeed: SpeedCalculator
+            ) {
+                progressCallback?.let { callback ->
+                    task.info?.let {
+                        if (it.totalLength > 0) {
+                            val percent: Int =
+                                (currentOffset.toFloat() / it.totalLength * 100).toInt()
+                            val msg =
+                                task.filename + "  ->  进度：" + percent + "%" + "   速度：" + taskSpeed.speed()
+                            callback.invoke(msg)
+                        }
+                    }
+                }
             }
 
             override fun connectEnd(
@@ -129,7 +156,7 @@ class DownloadFiles {
                 task: DownloadTask,
                 info: BreakpointInfo,
                 fromBreakpoint: Boolean,
-                model: Listener4Assist.Listener4Model
+                model: Listener4SpeedAssistExtend.Listener4SpeedModel
             ) {
                 println("infoReady=>" + task.filename)
             }
@@ -137,7 +164,8 @@ class DownloadFiles {
             override fun progressBlock(
                 task: DownloadTask,
                 blockIndex: Int,
-                currentBlockOffset: Long
+                currentBlockOffset: Long,
+                blockSpeed: SpeedCalculator
             ) {
                 println("progressBlock=>" + task.filename)
             }

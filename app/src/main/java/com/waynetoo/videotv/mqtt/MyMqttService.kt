@@ -30,6 +30,7 @@ class MyMqttService : Service() {
 //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Build.getSerial() else Build.SERIAL //客户端ID，一般以客户端唯一标识符表示，这里用设备序列号表示
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        println(TAG + "onStartCommand  " + flags + "  intent=" + intent)
         init()
         return super.onStartCommand(intent, flags, startId)
     }
@@ -186,11 +187,13 @@ class MyMqttService : Service() {
     }
 
     override fun onDestroy() {
+        println(TAG + "onDestroy  ")
         mqttAndroidClient?.let {
             if (it.isConnected) {
                 try {
                     it.disconnect() //断开连接
                 } catch (e: MqttException) {
+                    println(TAG + "onDestroy  disconnect ")
                     e.printStackTrace()
                 }
             }
