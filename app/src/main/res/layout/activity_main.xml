@@ -28,7 +28,8 @@
             android:layout_gravity="right|center_vertical"
             android:layout_marginRight="10dp"
             android:gravity="center_horizontal"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <Button
                 android:id="@+id/button2"

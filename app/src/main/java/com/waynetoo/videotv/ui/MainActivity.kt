@@ -97,6 +97,15 @@ class MainActivity : BaseActivity<MainPresenter>() {
             .get("LV_RECEIVE_MSG", String::class.java)
             .observe(this, Observer<String> {
                 toast(it)
+                //320121109489#6901028111027
+                val split = it.split("#")
+                if (split.size > 1) {
+                    if (split[0] == Constants.storeNo) {
+                        scanCode(split[1])
+                    }
+                } else {
+                    presenter.getAdList()
+                }
             })
     }
 
@@ -260,14 +269,19 @@ class MainActivity : BaseActivity<MainPresenter>() {
 //        6901028936477
 //        扫码 获得的code
         val code = playAdList[(playAdList.indices).random() % playAdList.size].videoName
+        scanCode(code)
+    }
+
+    private fun scanCode(code: String) {
         handler.removeMessages(WHAT_INSERT_AD)
         val msg = Message.obtain()
         msg.what = WHAT_INSERT_AD
         val bundle = Bundle()
         bundle.putString("code", code)
-        msg.data = bundle;//mes利用Bundle传递数据
+        msg.data = bundle//mes利用Bundle传递数据
         handler.sendMessage(msg)
     }
+
 
     fun undateAd(view: View) {
         presenter.getAdList()

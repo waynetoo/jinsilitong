@@ -33,18 +33,17 @@ class DownloadFiles {
      * 下载文件
      */
     fun downloadFiles(updateList: List<AdInfo>) {
-        OkDownload.with().downloadDispatcher().cancelAll()
-
+//        OkDownload.with().downloadDispatcher().cancelAll()
         updateCount = updateList.size
         val tasks: MutableList<DownloadTask> = ArrayList()
         val storeFile = USBUtils.createUsbDir()
         for (ad in updateList) {
             val task = DownloadTask.Builder(ad.downloadUrl, storeFile)
-                .setMinIntervalMillisCallbackProcess(5_000)
-                .setReadBufferSize(1024 * 8)
-                .setFlushBufferSize(1024 * 32)
-                .setSyncBufferSize(1024 * 64)
-                .setPreAllocateLength(true)
+//                .setMinIntervalMillisCallbackProcess(5_000)
+//                .setReadBufferSize(1024 * 8)
+//                .setFlushBufferSize(1024 * 32)
+//                .setSyncBufferSize(1024 * 64)
+//                .setConnectionCount(5)
                 .build()
             tasks.add(task)
         }
@@ -74,7 +73,7 @@ class DownloadFiles {
                 realCause: java.lang.Exception?,
                 taskSpeed: SpeedCalculator
             ) {
-                println("taskEnd=>" + task.filename)
+                println("taskEnd=>" + task.filename + " cause=" + cause)
                 //下载完成
                 if (cause == EndCause.COMPLETED) {
                     --updateCount
@@ -83,6 +82,8 @@ class DownloadFiles {
                     if (updateCount <= 0) {
                         complete.invoke()
                     }
+                } else if (cause == EndCause.ERROR) {
+                    println("taskEnd=>" + task.filename + " realCause=" + realCause)
                 }
             }
 

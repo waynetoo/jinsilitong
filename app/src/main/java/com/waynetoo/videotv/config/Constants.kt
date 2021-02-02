@@ -1,5 +1,6 @@
 package com.waynetoo.videotv.config
 
+import android.os.Environment
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.Preference
 import com.waynetoo.lib_common.extentions.getDeviceId
@@ -18,7 +19,8 @@ object Constants {
     //    var usbFileRoot: String by Preference(AppContext, "usbFileRoot", "")
     //保留前usb地址
 //    var usbFileRoot="/sdcard"
-    var usbFileRoot = AppContext.externalCacheDir?.absolutePath ?: AppContext.cacheDir.absolutePath
+    var usbFileRoot = Environment.getExternalStorageDirectory().absolutePath
+        ?: AppContext.externalCacheDir?.absolutePath ?: AppContext.cacheDir.absolutePath
 
     const val USB_FILE_DIR = "jsltong"
 
@@ -31,7 +33,6 @@ object Constants {
                 storeNo + AppContext.contentResolver.getDeviceId()
             }
         }
-
     //
     lateinit var playAdList: List<AdInfo>
 

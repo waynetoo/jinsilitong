@@ -171,11 +171,6 @@ class MyMqttService : Service() {
         ) {
             Log.i(TAG, "收到消息： " + String(message.payload))
             //收到消息，这里弹出Toast表示。如果需要更新UI，可以使用广播或者EventBus进行发送
-//            Toast.makeText(
-//                applicationContext,
-//                "messageArrived: " + String(message.payload),
-//                Toast.LENGTH_LONG
-//            ).show()
             LiveEventBus
                 .get(LV_RECEIVE_MSG)
                 .post(String(message.payload))
