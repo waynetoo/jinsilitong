@@ -116,6 +116,7 @@ object USBUtils {
     }
 
     fun createUsbDir(): File {
+        println("Constants.usbFileRoot ="+Constants.usbFileRoot)
         val storeFile = File(Constants.usbFileRoot, Constants.USB_FILE_DIR)
         if (!storeFile.exists()) {
             storeFile.mkdir()

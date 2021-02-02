@@ -38,7 +38,7 @@ suspend fun fetchData(): String {
 suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
     val createUsbDir = USBUtils.createUsbDir()
     val localList = arrayListOf<LocalFileAd>()
-    createUsbDir.listFiles().forEach {
+    createUsbDir.listFiles()?.forEach {
         localList.add(
             LocalFileAd(
                 it.fileMd5(),

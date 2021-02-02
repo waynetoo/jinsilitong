@@ -5,13 +5,13 @@ apply plugin: 'kotlin-kapt'
 apply from: rootProject.file('dependencies.gradle')
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 28
     buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.waynetoo.videotv"
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         multiDexEnabled true

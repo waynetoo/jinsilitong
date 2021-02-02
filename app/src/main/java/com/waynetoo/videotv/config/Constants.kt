@@ -1,5 +1,6 @@
 package com.waynetoo.videotv.config
 
+import android.os.Environment
 import com.waynetoo.lib_common.AppContext
 import com.waynetoo.lib_common.extentions.Preference
 import com.waynetoo.lib_common.extentions.getDeviceId
