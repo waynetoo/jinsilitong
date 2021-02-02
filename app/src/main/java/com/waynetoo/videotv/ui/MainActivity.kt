@@ -101,10 +101,12 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 val split = it.split("#")
                 if (split.size > 1) {
                     if (split[0] == Constants.storeNo) {
-                        scanCode(split[1])
+                        if (split[1].contains("updateAd", true)) {
+                            presenter.getAdList()
+                        } else {
+                            scanCode(split[1])
+                        }
                     }
-                } else {
-                    presenter.getAdList()
                 }
             })
     }
