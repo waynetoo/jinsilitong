@@ -36,7 +36,7 @@ abstract class BaseActivity<out P : BasePresenter<BaseActivity<P>>> : IMvpView<P
         sequence<Type> {
             var thisClass: Class<*> = this@BaseActivity.javaClass
             while (true) {
-                yield(thisClass.genericSuperclass)
+                yield(thisClass.genericSuperclass!!)
                 thisClass = thisClass.superclass ?: break
             }
         }.filter {

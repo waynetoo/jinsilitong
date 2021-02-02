@@ -5,15 +5,15 @@ apply plugin: 'kotlin-kapt'
 apply from: rootProject.file('dependencies.gradle')
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion build_versions.target_sdk
     buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.waynetoo.videotv"
-        minSdkVersion 19
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion build_versions.min_sdk
+        targetSdkVersion build_versions.target_sdk
+        versionCode build_versions.version_code
+        versionName build_versions.version_name
         multiDexEnabled true
         ndk {
             //设置支持的SO库架构
@@ -64,7 +64,7 @@ android {
 }
 
 def releaseTime() {
-    return new Date().format("yyMMddHHmm", TimeZone.getTimeZone("UTC"))
+    return new Date().format("yyMMddHHmm", TimeZone.getTimeZone("GMT+08:00"))
 }
 
 dependencies {

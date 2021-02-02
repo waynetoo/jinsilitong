@@ -2,8 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.waynetoo.videotv"
-    android:installLocation="internalOnly"
-    tools:ignore="MissingLeanbackLauncher">
+    android:installLocation="internalOnly">
 
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-feature
@@ -11,7 +10,7 @@
         android:required="false" />
     <uses-feature
         android:name="android.software.leanback"
-        android:required="true" />
+        android:required="false" />
     <!-- .接收启动完成的广播权限 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -25,8 +24,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS" />
-    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"
-        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
 
     <application
         android:name=".app.Application"
@@ -81,18 +79,18 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
 
         <receiver android:name=".receiver.USBBroadcastReceiver">
             <intent-filter>
                 <!-- 插入-->
-                <action android:name="android.intent.action.MEDIA_MOUNTED"/>
+                <action android:name="android.intent.action.MEDIA_MOUNTED" />
                 <!--拔出-->
-                <action android:name="android.intent.action.MEDIA_UNMOUNTED"/>
+                <action android:name="android.intent.action.MEDIA_UNMOUNTED" />
                 <!--完全拔出-->
-                <action android:name="android.intent.action.MEDIA_REMOVED"/>
-                <data android:scheme="file"/>
+                <action android:name="android.intent.action.MEDIA_REMOVED" />
+                <data android:scheme="file" />
             </intent-filter>
         </receiver>
     </application>
