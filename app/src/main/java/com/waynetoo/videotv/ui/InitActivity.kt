@@ -53,14 +53,16 @@ class InitActivity : BaseActivity<BinderPresenter>() {
     }
 
     private fun printMsg() {
-        print_msg.text = "sdk：" + Build.VERSION.SDK_INT + "\n" +
-                "U盘path:" + Constants.usbFileRoot + "\n" +
-                "  rootPath可写：" + File(Constants.usbFileRoot).canWrite() + "\n" +
-                "  rootPath可读：" + File(Constants.usbFileRoot).canRead() + "\n" +
+        print_msg.text = "sdk：" + Build.VERSION.SDK_INT + "\n"
+        "U盘path:" + Constants.usbFileRoot + "\n" +
+                "   rootPath可写：" + File(Constants.usbFileRoot).canWrite() + "\n" +
+                "   rootPath可读：" + File(Constants.usbFileRoot).canRead() + "\n" +
 
                 " video文件路径：" + USBUtils.createUsbDir() + "\n" +
-                "  可写：" + USBUtils.createUsbDir().canWrite() + "\n" +
-                "  可读：" + USBUtils.createUsbDir().canRead()
+                "   可写：" + USBUtils.createUsbDir().canWrite() + "\n" +
+                "   可读：" + USBUtils.createUsbDir().canRead() + "\n" +
+
+                " Open_document：" + isIntentExisting(Intent.ACTION_OPEN_DOCUMENT_TREE)
     }
 
 //    private fun registerReceiver() {
@@ -212,8 +214,6 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         if (intent == null) {
             if (isIntentExisting(Intent.ACTION_OPEN_DOCUMENT_TREE)) {
                 intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            } else {
-                toast("ACTION_OPEN_DOCUMENT_TREE not exist")
             }
         }
         if (intent != null) {
