@@ -107,6 +107,7 @@ class MyMqttService : Service() {
      * 连接MQTT服务器
      */
     private fun doClientConnection() {
+        Log.i(TAG, "doClientConnection")
         mqttAndroidClient?.let {
             if (!it.isConnected && isConnectIsNomarl) {
                 try {
@@ -116,6 +117,7 @@ class MyMqttService : Service() {
                         iMqttActionListener
                     )
                 } catch (e: MqttException) {
+                    Log.i(TAG, "doClientConnection", e)
                     e.printStackTrace()
                 }
             }
@@ -187,7 +189,10 @@ class MyMqttService : Service() {
     }
 
     override fun onDestroy() {
-        println(TAG + "onDestroy  ")
+        println("$TAG   onDestroy  " + mqttAndroidClient?.isConnected)
+        super.onDestroy()
+        mqttAndroidClient?.unsubscribe(RESPONSE_TOPIC)
+        mqttAndroidClient?.unregisterResources()
         mqttAndroidClient?.let {
             if (it.isConnected) {
                 try {
@@ -198,7 +203,6 @@ class MyMqttService : Service() {
                 }
             }
         }
-        super.onDestroy()
     }
 
     companion object {
