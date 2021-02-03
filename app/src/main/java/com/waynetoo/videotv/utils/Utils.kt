@@ -20,10 +20,10 @@ val isConnectIsNormal: Boolean
         val info = connectivityManager.activeNetworkInfo
         return if (info != null && info.isAvailable) {
             val name = info.typeName
-            println("当前网络名称：$name")
+            Logger.log("当前网络名称：$name")
             true
         } else {
-            println("没有可用网络")
+            Logger.log("没有可用网络")
             /*没有可用网络的时候，延迟3秒再尝试重连*/
             false
         }

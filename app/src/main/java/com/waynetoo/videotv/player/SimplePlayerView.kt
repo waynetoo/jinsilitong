@@ -23,6 +23,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.upstream.FileDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.waynetoo.lib_common.extentions.toast
+import com.waynetoo.videotv.utils.Logger
 
 
 /**
@@ -82,7 +83,7 @@ open class SimplePlayerView : PlayerView, IPlayer {
         val uri = Uri.parse(url)
         val dataSourceFactory =
             FileDataSourceFactory()
-        println("Util.inferContentType(uri) =" + Util.inferContentType(uri))
+        Logger.log("Util.inferContentType(uri) =" + Util.inferContentType(uri))
         return when (val type = Util.inferContentType(uri)) {
             C.TYPE_DASH -> DashMediaSource.Factory(dataSourceFactory)
             C.TYPE_HLS -> HlsMediaSource.Factory(dataSourceFactory)
@@ -177,7 +178,7 @@ open class SimplePlayerView : PlayerView, IPlayer {
     override fun setVisibility(visibility: Int) {
         super.setVisibility(visibility)
         if (visibility == View.GONE) {
-            println(" isReady :" + player?.playWhenReady)
+            Logger.log(" isReady :" + player?.playWhenReady)
 //            pause()
         }
     }

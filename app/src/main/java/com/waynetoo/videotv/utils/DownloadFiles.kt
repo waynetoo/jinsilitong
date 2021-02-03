@@ -67,7 +67,7 @@ class DownloadFiles {
         object : DownloadListener4WithSpeed() {
 
             override fun taskStart(task: DownloadTask) {
-                println("taskStart=>" + task.filename)
+                Logger.log("taskStart=>" + task.filename)
 //                AppContext.toast("taskStart=>" + task.filename)
 //
 //                progressCallback?.let { callback ->
@@ -82,7 +82,7 @@ class DownloadFiles {
                 info: BlockInfo?,
                 blockSpeed: SpeedCalculator
             ) {
-                println("blockEnd=>" + task.filename)
+//                Logger.log("blockEnd=>" + task.filename)
 //                progressCallback?.let { callback ->
 //                    callback.invoke("blockEnd=>" + task.filename + "\n")
 //                }
@@ -96,14 +96,14 @@ class DownloadFiles {
                 taskSpeed: SpeedCalculator
             ) {
                 currentDownloadfileName = null
-                println("taskEnd=>" + task.filename + " cause=" + cause)
+                Logger.log("taskEnd=>" + task.filename + " cause=" + cause)
                 //下载完成
                 --updateCount
                 taskEnd.invoke(task, cause)
                 if (cause == EndCause.COMPLETED) {
 //                  AppContext.toast(task.filename + " 下载成功," + "剩余 " + updateCount + "个")
                 } else if (cause == EndCause.ERROR) {
-                    println("taskEnd=>" + task.filename + " realCause=" + realCause)
+                    Logger.log("taskEnd=>" + task.filename + " realCause=" + realCause)
                 }
 
                 if (updateCount <= 0) {
@@ -154,9 +154,9 @@ class DownloadFiles {
             ) {
 //                println("connectStart=>" + task.filename)
 //                AppContext.toast("connectStart=>" + task.filename)
-                progressCallback?.let { callback ->
-                    callback.invoke("connectStart=>" + task.filename + "\n")
-                }
+//                progressCallback?.let { callback ->
+//                    callback.invoke("connectStart=>" + task.filename + "\n")
+//                }
             }
 
             override fun infoReady(
@@ -166,7 +166,7 @@ class DownloadFiles {
                 model: Listener4SpeedAssistExtend.Listener4SpeedModel
             ) {
                 currentDownloadfileName = task.filename
-                println("infoReady=>" + task.filename)
+                Logger.log("infoReady=>" + task.filename)
 //                AppContext.toast("infoReady=>" + task.filename)
 //                progressCallback?.let { callback ->
 //                    callback.invoke("infoReady=>" + task.filename + "\n")
@@ -179,7 +179,7 @@ class DownloadFiles {
                 currentBlockOffset: Long,
                 blockSpeed: SpeedCalculator
             ) {
-                println("progressBlock=>" + task.filename)
+                Logger.log("progressBlock=>" + task.filename)
 //                AppContext.toast("progressBlock=>" + task.filename)
 //                progressCallback?.let { callback ->
 //                    callback.invoke("progressBlock=>" + task.filename + "\n")

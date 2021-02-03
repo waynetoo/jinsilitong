@@ -117,7 +117,7 @@ object USBUtils {
     }
 
     fun createUsbDir(): File {
-        println("Constants.usbFileRoot =" + Constants.usbFileRoot)
+        Logger.log("Constants.usbFileRoot =" + Constants.usbFileRoot)
         val storeFile = File(Constants.usbFileRoot, Constants.USB_FILE_DIR)
         if (!storeFile.exists()) {
             storeFile.mkdir()
@@ -126,7 +126,7 @@ object USBUtils {
     }
 
     fun createSdcardDir(): File {
-        println("Constants.sdcardRoot =" + Constants.sdcardRoot)
+        Logger.log("Constants.sdcardRoot =" + Constants.sdcardRoot)
         val storeFile = File(Constants.sdcardRoot, Constants.USB_FILE_DIR)
         if (!storeFile.exists()) {
             storeFile.mkdir()

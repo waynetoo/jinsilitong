@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.annotation.Nullable
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.waynetoo.videotv.config.Constants
+import com.waynetoo.videotv.utils.Logger
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
@@ -30,7 +31,7 @@ class MyMqttService : Service() {
 //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Build.getSerial() else Build.SERIAL //客户端ID，一般以客户端唯一标识符表示，这里用设备序列号表示
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        println(TAG + "onStartCommand  " + flags + "  intent=" + intent)
+        Logger.log(TAG + "onStartCommand  " + flags + "  intent=" + intent)
         init()
         return super.onStartCommand(intent, flags, startId)
     }
@@ -68,7 +69,7 @@ class MyMqttService : Service() {
     private fun init() {
         val serverURI = HOST //服务器地址（协议+地址+端口号）
         mqttAndroidClient = MqttAndroidClient(this, serverURI, CLIENTID)
-        println("CLIENTID: $CLIENTID")
+        Logger.log("CLIENTID: $CLIENTID")
         mqttAndroidClient!!.setCallback(mqttCallback) //设置监听订阅消息的回调
         mMqttConnectOptions = MqttConnectOptions()
         mMqttConnectOptions!!.isCleanSession = true //设置是否清除缓存
@@ -189,7 +190,7 @@ class MyMqttService : Service() {
     }
 
     override fun onDestroy() {
-        println("$TAG   onDestroy  " + mqttAndroidClient?.isConnected)
+        Logger.log("$TAG   onDestroy  " + mqttAndroidClient?.isConnected)
         super.onDestroy()
         mqttAndroidClient?.unsubscribe(RESPONSE_TOPIC)
         mqttAndroidClient?.unregisterResources()
@@ -198,7 +199,7 @@ class MyMqttService : Service() {
                 try {
                     it.disconnect() //断开连接
                 } catch (e: MqttException) {
-                    println(TAG + "onDestroy  disconnect ")
+                    Logger.log(TAG + "onDestroy  disconnect ")
                     e.printStackTrace()
                 }
             }

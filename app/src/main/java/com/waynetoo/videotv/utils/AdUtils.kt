@@ -63,7 +63,7 @@ suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
             )
         }
     }
-    println("localFiles :$localList")
+    Logger.log("localFiles :$localList")
     localList
 }
 
@@ -78,7 +78,7 @@ suspend fun deleteFiles(
         .forEach {
             //删除数据库 和文件
             if (!it.isUsbPath) {
-                println("删除文件：" + it.filePath)
+                Logger.log("删除文件：" + it.filePath)
                 File(it.filePath).delete()
             }
         }
@@ -102,7 +102,7 @@ suspend fun syncLocal2RemoteAndObtainUpdateList(
                 remote.setData(find)
             }
         }
-        println("updateList：$updateList")
+        Logger.log("updateList：$updateList")
         updateList
     }
 
@@ -145,7 +145,6 @@ fun File.fileMd5(): String {
     if (!isFile || !exists()) {
         return ""
     }
-    println("start md5 " + name + " ->" + System.currentTimeMillis())
     var digest: MessageDigest? = null
     var `in`: FileInputStream? = null
     val buffer = ByteArray(8192)
@@ -166,7 +165,6 @@ fun File.fileMd5(): String {
     while (md5.length < 32) {
         md5 = "0$md5"
     }
-    println("end md5 " + name + " ->" + md5 + "  " + System.currentTimeMillis())
     return md5
 }
 

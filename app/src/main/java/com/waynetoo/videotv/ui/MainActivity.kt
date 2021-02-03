@@ -99,7 +99,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                         if (find == null) {
                             flushAdList = true
                             tv_speed.text = ""
-                            println(" 下载完成 --确实没有了")
+                            Logger.log(" 下载完成 --确实没有了")
                         } else {
                             //15s后继续下载
                             sendEmptyMessageAtTime(WHAT_DOWN_LOAD, 15_000)
@@ -109,7 +109,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                     }
                 }
                 else -> {
-                    Log.d(TAG, "handler else")
+                    Logger.log("handler else")
                 }
             }
         }
@@ -203,17 +203,17 @@ class MainActivity : BaseActivity<MainPresenter>() {
             //播放列表有,远程没有
             val updatePlayList =
                 playAdList.filterNot { play -> remoteList.any { it.md5 == play.md5 } }
-//            println("updateList$updateList")
+//            Logger.log("updateList$updateList")
             if (downLoadList!!.isNotEmpty()) {
-                println("准备下载 downLoadList$downLoadList")
+                Logger.log("准备下载 downLoadList$downLoadList")
                 //删除了数据
                 OkDownload.with().downloadDispatcher().cancelAll()
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else if (updatePlayList.isNotEmpty()) {
-                println("广告有删除")
+                Logger.log("广告有删除")
                 flushAdList = true
             } else {
-                println("广告没有更新")
+                Logger.log("广告没有更新")
             }
         }
     }
@@ -229,7 +229,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
             initPlayer()
             playerCallback = { playWhenReady, state ->
                 if (state == Player.STATE_ENDED) {  // 播放结束
-                    println("playerCallback  播放结束" + currentPlay.fileName)
+                    Logger.log("playerCallback  播放结束" + currentPlay.fileName)
                     if (isInsertAd) {
                         isInsertAd = false
                         playNext(true)
@@ -238,9 +238,9 @@ class MainActivity : BaseActivity<MainPresenter>() {
                     }
                 } else {
                     if (state == Player.STATE_READY && playWhenReady) {  // 播放中
-                        println("playerCallback  播放中")
+                        Logger.log("playerCallback  播放中")
                     } else if (state == Player.STATE_READY && !playWhenReady) {  // 暂停中
-                        println("playerCallback  暂停中")
+                        Logger.log("playerCallback  暂停中")
                         //?
                     }
                 }
@@ -268,12 +268,12 @@ class MainActivity : BaseActivity<MainPresenter>() {
             if (!isRestore) {
                 //如果需要刷新list ，重新播放
                 if (flushAdList) {
-                    println(" flushAdList ==> initData")
+                    Logger.log(" flushAdList ==> initData")
                     initData()
                     flushAdList = false
                     return
                 }
-//                println(index.toString())
+//                Logger.log(index.toString())
                 currentPlay = getNextAd()
                 currentPlay.currentPosition = 0L
             }
@@ -301,13 +301,13 @@ class MainActivity : BaseActivity<MainPresenter>() {
      * 播放
      */
     private fun play(adInfo: AdInfo) {
-        println("play ==>:" + adInfo.fileName)
+        Logger.log("play ==>:" + adInfo.fileName)
 //        toast("play :" + USBUtils.createFilePath(adInfo.fileName))
         if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo))
             playerView.start()
             playerView.seekTo(adInfo.currentPosition)
-//            println("seekTo :" + adInfo.currentPosition)
+//            Logger.log("seekTo :" + adInfo.currentPosition)
             if (!playerView.isVisible) {
                 playerView.visibility = View.VISIBLE
                 imageView.visibility = View.GONE
