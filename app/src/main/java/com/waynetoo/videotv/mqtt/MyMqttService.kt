@@ -30,14 +30,14 @@ class MyMqttService : Service() {
     }
 //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Build.getSerial() else Build.SERIAL //客户端ID，一般以客户端唯一标识符表示，这里用设备序列号表示
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Logger.log(TAG + "onStartCommand  " + flags + "  intent=" + intent)
         init()
         return super.onStartCommand(intent, flags, startId)
     }
 
     @Nullable
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
