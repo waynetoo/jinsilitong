@@ -61,7 +61,8 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 WHAT_INSERT_AD -> {
                     try {
                         var code = msg.data.getString("code")
-                        val insertAd = playAdList.find { it.videoName == code }
+                        val insertAd =
+                            playAdList.find { it.videoName == code && !TextUtils.isEmpty(it.fileName) }
                         if (insertAd == null) {
                             toast("没有找到此条码的广告")
                         } else {
@@ -300,7 +301,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
      * 播放
      */
     private fun play(adInfo: AdInfo) {
-        println("play :" + adInfo.fileName)
+        println("play ==>:" + adInfo.fileName)
 //        toast("play :" + USBUtils.createFilePath(adInfo.fileName))
         if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo))
