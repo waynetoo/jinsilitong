@@ -37,20 +37,35 @@ suspend fun fetchData(): String {
 
 suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
     val createUsbDir = USBUtils.createUsbDir()
+    val createSdcardDir = USBUtils.createUsbDir()
     val localList = arrayListOf<LocalFileAd>()
+    //usb中的
     createUsbDir.listFiles()?.forEach {
         localList.add(
             LocalFileAd(
                 it.fileMd5(),
                 it.name,
-                it.absolutePath
+                it.absolutePath,
+                true
             )
         )
+    }
+    //sdcard中的
+    if (createUsbDir.path != createSdcardDir.path) {
+        createSdcardDir.listFiles()?.forEach {
+            localList.add(
+                LocalFileAd(
+                    it.fileMd5(),
+                    it.name,
+                    it.absolutePath,
+                    false
+                )
+            )
+        }
     }
     println("localFiles :$localList")
     localList
 }
-
 
 /**
  * 删除文件
@@ -62,8 +77,10 @@ suspend fun deleteFiles(
     localFiles.filterNot { local -> remoteList.any { it.md5 == local.md5 } }
         .forEach {
             //删除数据库 和文件
-            println("删除文件：" + it.filePath)
-            File(USBUtils.createFilePath(it.fileName)).delete()
+            if (!it.isUsbPath) {
+                println("删除文件：" + it.filePath)
+                File(it.filePath).delete()
+            }
         }
 }
 
@@ -94,6 +111,24 @@ fun insertUpdateAd(updateList: List<AdInfo>, task: DownloadTask) {
         ?.let { adInfo ->
             task.file?.let {
                 adInfo.fileName = it.name
+                adInfo.isUsbPath = false
+            }
+        }
+}
+
+fun insertUpdateAdSync(updateList: List<AdInfo>, nowPlay: List<AdInfo>, task: DownloadTask) {
+    updateList.find { it.downloadUrl == task.url }
+        ?.let { adInfo ->
+            task.file?.let {
+                adInfo.fileName = it.name
+                adInfo.isUsbPath = false
+            }
+        }
+    nowPlay.find { it.downloadUrl == task.url }
+        ?.let { adInfo ->
+            task.file?.let {
+                adInfo.fileName = it.name
+                adInfo.isUsbPath = false
             }
         }
 }

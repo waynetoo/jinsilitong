@@ -2,6 +2,7 @@ package com.waynetoo.videotv.utils
 
 import android.os.Environment
 import com.waynetoo.videotv.config.Constants
+import com.waynetoo.videotv.model.AdInfo
 import kotlinx.io.InputStream
 import java.io.BufferedReader
 import java.io.File
@@ -116,8 +117,17 @@ object USBUtils {
     }
 
     fun createUsbDir(): File {
-        println("Constants.usbFileRoot ="+Constants.usbFileRoot)
+        println("Constants.usbFileRoot =" + Constants.usbFileRoot)
         val storeFile = File(Constants.usbFileRoot, Constants.USB_FILE_DIR)
+        if (!storeFile.exists()) {
+            storeFile.mkdir()
+        }
+        return storeFile
+    }
+
+    fun createSdcardDir(): File {
+        println("Constants.sdcardRoot =" + Constants.sdcardRoot)
+        val storeFile = File(Constants.sdcardRoot, Constants.USB_FILE_DIR)
         if (!storeFile.exists()) {
             storeFile.mkdir()
         }
@@ -127,11 +137,11 @@ object USBUtils {
     /**
      * 建立文件名称
      */
-    fun createFilePath(fileName: String): String {
-//        if (usbRoot.isEmpty()) {
-//            val storeFile = File(Constants.usbFileRoot, Constants.USB_FILE_DIR)
-//            usbRoot = storeFile.absolutePath
-//        }
-        return Constants.usbFileRoot + File.separator + Constants.USB_FILE_DIR + File.separator + fileName
+    fun createFilePath(adInfo: AdInfo): String {
+        return if (adInfo.isUsbPath) {
+            Constants.usbFileRoot + File.separator + Constants.USB_FILE_DIR + File.separator + adInfo.fileName
+        } else {
+            Constants.sdcardRoot + File.separator + Constants.USB_FILE_DIR + File.separator + adInfo.fileName
+        }
     }
 }

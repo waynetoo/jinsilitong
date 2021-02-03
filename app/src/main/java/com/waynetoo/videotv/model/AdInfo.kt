@@ -8,12 +8,14 @@ data class AdInfo(
     var storeNo: String? = "",
     var downloadUrl: String = "",
     var modifiedTimes: String = "",
-    //包含后缀名的name
+    //包含后缀名的name  本地存在后，才会有这个名字
     var fileName: String = "",
-    var currentPosition: Long = 0L
+    var currentPosition: Long = 0L,
+    var isUsbPath: Boolean = false
 ) {
     fun setData(file: LocalFileAd) {
         fileName = file.fileName
+        isUsbPath = file.isUsbPath
     }
 }
 
@@ -21,5 +23,6 @@ data class LocalFileAd(
     var md5: String = "",
     //包含后缀名的name
     var fileName: String = "",
-    var filePath: String = ""
+    var filePath: String = "",
+    var isUsbPath: Boolean = false
 )

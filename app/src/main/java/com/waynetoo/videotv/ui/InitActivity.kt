@@ -9,6 +9,7 @@ import android.os.storage.StorageManager
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
+import com.liulishuo.okdownload.core.cause.EndCause
 import com.waynetoo.lib_common.extentions.checkPermissions
 import com.waynetoo.lib_common.extentions.isIntentExisting
 import com.waynetoo.lib_common.extentions.toast
@@ -44,26 +45,26 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         checkPermissions(
             getString(R.string.storage_status_tips),
             {
+//                printMsg()
                 checkStoreNoAndUsb()
-                printMsg()
             },
             { finish() },
             Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
         )
     }
 
-    private fun printMsg() {
-        print_msg.text = "sdk：" + Build.VERSION.SDK_INT + "\n"
-        "U盘path:" + Constants.usbFileRoot + "\n" +
-                "   rootPath可写：" + File(Constants.usbFileRoot).canWrite() + "\n" +
-                "   rootPath可读：" + File(Constants.usbFileRoot).canRead() + "\n" +
-
-                " video文件路径：" + USBUtils.createUsbDir() + "\n" +
-                "   可写：" + USBUtils.createUsbDir().canWrite() + "\n" +
-                "   可读：" + USBUtils.createUsbDir().canRead() + "\n" +
-
-                " Open_document：" + isIntentExisting(Intent.ACTION_OPEN_DOCUMENT_TREE)
-    }
+//    private fun printMsg() {
+//        print_msg.text =
+//            "sdk：" + Build.VERSION.SDK_INT + "\n" + "U盘path:" + Constants.usbFileRoot + "\n" +
+//                    "   rootPath可写：" + File(Constants.usbFileRoot).canWrite() + "\n" +
+//                    "   rootPath可读：" + File(Constants.usbFileRoot).canRead() + "\n" +
+//
+//                    " video文件路径：" + USBUtils.createUsbDir() + "\n" +
+//                    "   可写：" + USBUtils.createUsbDir().canWrite() + "\n" +
+//                    "   可读：" + USBUtils.createUsbDir().canRead() + "\n" +
+//
+//                    " Open_document：" + isIntentExisting(Intent.ACTION_OPEN_DOCUMENT_TREE)
+//    }
 
 //    private fun registerReceiver() {
 //        usbBroadcastReceiver = USBBroadcastReceiver()
@@ -92,7 +93,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             ll_binder.visibility = View.VISIBLE
             msg.visibility = View.GONE
             et_store_no.requestFocus()
-            et_store_no.setText("320201215431")
+//            et_store_no.setText("320201215431")
         } else if (!USBUtils.isUsbEnable()) {
             toast(R.string.usb_notice)
             ll_binder.visibility = View.VISIBLE
@@ -125,24 +126,24 @@ class InitActivity : BaseActivity<BinderPresenter>() {
     }
 
     private fun getAdList() {
-        checkUsbWritable {
-            presenter.getAdList()
-        }
+//        checkUsbWritable {
+        presenter.getAdList()
+//        }
     }
 
     /**
      *  * 其中 DocumentsUtils.checkWritableRootPath() 方法用来检查 SD 卡根目录是否有写入权限，
      * 如果没有则跳转到权限请求；DocumentsUtils.saveTreeUri() 方法保存返回的 Uri 信息到本地存储，以便之后查询。
      */
-    private fun checkUsbWritable(valid: () -> Unit) {
-        println(" ======checkUsbWritable=========")
-        //false 表示可以写，true 表示不可以写
-        if (DocumentsUtils.checkWritableRootPath(this, Constants.usbFileRoot)) {
-            showOpenDocumentTree()
-        } else {
-            valid.invoke()
-        }
-    }
+//    private fun checkUsbWritable(valid: () -> Unit) {
+//        println(" ======checkUsbWritable=========")
+//        //false 表示可以写，true 表示不可以写
+//        if (DocumentsUtils.checkWritableRootPath(this, Constants.usbFileRoot)) {
+//            showOpenDocumentTree()
+//        } else {
+//            valid.invoke()
+//        }
+//    }
 
     fun bindSuccess(storeNo: String) {
         Constants.storeNo = storeNo
@@ -155,8 +156,6 @@ class InitActivity : BaseActivity<BinderPresenter>() {
     fun getAdListSuccess(remoteList: List<AdInfo>) {
         ll_binder.visibility = View.GONE
         msg.visibility = View.VISIBLE
-        //播放列表
-        Constants.playAdList = remoteList
         if (remoteList.isEmpty()) {
             msg.text = "广告列表为空，请添加广告 。。"
             return
@@ -170,17 +169,24 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             // 删除广告
             deleteFiles(localFiles, remoteList)
 
-            if (updateList.isEmpty()) {
+            // 预加载的 播放列表
+            Constants.playAdList = remoteList
+            //播放的广告，本地一个也没有
+            if (remoteList.size != updateList.size) {
                 startActivity(Intent(this@InitActivity, MainActivity::class.java))
                 finish()
             } else {
                 msg.text = "下载广告中。。。"
                 //更新列表
-                DownloadFiles({ task ->
-                    insertUpdateAd(updateList, task)
+                DownloadFiles({ task, cause ->
+                    if (cause == EndCause.COMPLETED) {
+                        insertUpdateAd(updateList, task)
+                    }
                 }, {
                     downloadSuccess()
                 }, {
+//                    print_msg.append(it)
+//                    scroller.fullScroll(View.FOCUS_DOWN);
                     progress.text = it
                 }).downloadFiles(updateList)
             }
@@ -202,38 +208,38 @@ class InitActivity : BaseActivity<BinderPresenter>() {
 //        unregisterReceiver(usbBroadcastReceiver)
     }
 
-    private fun showOpenDocumentTree() {
-        var intent: Intent? = null
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val sm: StorageManager = getSystemService(StorageManager::class.java)
-            val volume = sm.getStorageVolume(File(Constants.usbFileRoot))
-            if (volume != null) {
-                intent = volume.createAccessIntent(null)
-            }
-        }
-        if (intent == null) {
-            if (isIntentExisting(Intent.ACTION_OPEN_DOCUMENT_TREE)) {
-                intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            }
-        }
-        if (intent != null) {
-            startActivityForResult(intent, DocumentsUtils.OPEN_DOCUMENT_TREE_CODE)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            DocumentsUtils.OPEN_DOCUMENT_TREE_CODE -> if (data != null && data.data != null) {
-                val uri: Uri = data.data
-                saveTreeUri(this, Constants.usbFileRoot, uri)
-                println("saveTreeUri  " + Constants.usbFileRoot + " --> " + uri)
-                getAdList()
-            }
-            else -> {
-            }
-        }
-    }
+//    private fun showOpenDocumentTree() {
+//        var intent: Intent? = null
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            val sm: StorageManager = getSystemService(StorageManager::class.java)
+//            val volume = sm.getStorageVolume(File(Constants.usbFileRoot))
+//            if (volume != null) {
+//                intent = volume.createAccessIntent(null)
+//            }
+//        }
+//        if (intent == null) {
+//            if (isIntentExisting(Intent.ACTION_OPEN_DOCUMENT_TREE)) {
+//                intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+//            }
+//        }
+//        if (intent != null) {
+//            startActivityForResult(intent, DocumentsUtils.OPEN_DOCUMENT_TREE_CODE)
+//        }
+//    }
+//
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        when (requestCode) {
+//            DocumentsUtils.OPEN_DOCUMENT_TREE_CODE -> if (data != null && data.data != null) {
+//                val uri: Uri = data.data
+//                saveTreeUri(this, Constants.usbFileRoot, uri)
+//                println("saveTreeUri  " + Constants.usbFileRoot + " --> " + uri)
+//                getAdList()
+//            }
+//            else -> {
+//            }
+//        }
+//    }
 
     /**
      * 通过监听keyUp   实现双击返回键退出程序

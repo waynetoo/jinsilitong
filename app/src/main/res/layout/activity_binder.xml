@@ -40,6 +40,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="35dp"
             android:background="@drawable/selector_focus_btn"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:paddingTop="5sp"
             android:paddingBottom="5sp"
             android:text="确定"
@@ -48,13 +50,13 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/msg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:textColor="@color/black"
-        android:textSize="32sp"
-        android:visibility="gone"></TextView>
+    android:id="@+id/msg"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:textColor="@color/black"
+    android:textSize="32sp"
+    android:visibility="gone"></TextView>
 
     <TextView
         android:id="@+id/progress"
@@ -66,10 +68,17 @@
         android:textColor="@color/white"
         android:textSize="18sp"></TextView>
 
-    <TextView
-        android:id="@+id/print_msg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp" />
+    <!--    <ScrollView-->
+    <!--        android:id="@+id/scroller"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="match_parent">-->
+    <!--        <TextView-->
+    <!--            android:id="@+id/print_msg"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_alignParentBottom="true"-->
+    <!--            android:layout_marginBottom="10dp" />-->
+
+    <!--    </ScrollView>-->
+
 </RelativeLayout>
