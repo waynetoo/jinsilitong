@@ -38,8 +38,11 @@ class MainActivity : BaseActivity<MainPresenter>() {
     private var usbBroadcastReceiver: USBBroadcastReceiver? = null
     lateinit var playAdList: List<AdInfo>
     lateinit var currentPlay: AdInfo
+
+    @Volatile
     var isInsertAd: Boolean = false
 
+    @Volatile
     var flushAdList: Boolean = false
 
     //需要升级的
@@ -122,6 +125,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
         initDownLoaderListener()
         initData()
         initObserve()
+        initMqtt()
         presenter.getAdList()
 //        registerReceiver()
     }
@@ -163,6 +167,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     private fun initData() {
         playAdList = Constants.playAdList
+        Logger.log("initData->playAdList=> $playAdList")
         currentPlay = playAdList.first { !TextUtils.isEmpty(it.fileName) }
         play(currentPlay)
     }
@@ -202,15 +207,15 @@ class MainActivity : BaseActivity<MainPresenter>() {
             downLoadList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
             //播放列表有,远程没有
             val updatePlayList =
-                playAdList.filterNot { play -> remoteList.any { it.md5 == play.md5 } }
-//            Logger.log("updateList$updateList")
+                playAdList.filterNot { play -> remoteList.any { it.md5 == play.md5 && it.id == play.id } }
             if (downLoadList!!.isNotEmpty()) {
                 Logger.log("准备下载 downLoadList$downLoadList")
                 //删除了数据
                 OkDownload.with().downloadDispatcher().cancelAll()
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else if (updatePlayList.isNotEmpty()) {
-                Logger.log("广告有删除")
+                Logger.log("updateList$updatePlayList")
+                Logger.log("广告有删除 或者变更顺序")
                 flushAdList = true
             } else {
                 Logger.log("广告没有更新")
@@ -220,7 +225,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     override fun onResume() {
         super.onResume()
-        initMqtt()
     }
 
     private fun initVideoComponent() {
@@ -250,11 +254,11 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     override fun onPause() {
         super.onPause()
-        stopService(mIntent)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        stopService(mIntent)
 //        unregisterReceiver(usbBroadcastReceiver)
     }
 
@@ -264,32 +268,34 @@ class MainActivity : BaseActivity<MainPresenter>() {
     }
 
     private fun playNext(isRestore: Boolean = false) {
-        if (playAdList.isNotEmpty()) {
-            if (!isRestore) {
-                //如果需要刷新list ，重新播放
-                if (flushAdList) {
-                    Logger.log(" flushAdList ==> initData")
-                    initData()
-                    flushAdList = false
-                    return
-                }
-//                Logger.log(index.toString())
-                currentPlay = getNextAd()
-                currentPlay.currentPosition = 0L
+        //是否是恢复
+        if (!isRestore) {
+            //如果需要刷新list ，重新播放
+            if (flushAdList) {
+                flushAdList = false
+                Logger.log(" flushAdList ==> initData")
+                toast(" flushAdList ==> " + Constants.playAdList)
+                initData()
+                return
             }
-            play(currentPlay)
+// Logger.log(index.toString())
+            currentPlay = getNextAd()
+            currentPlay.currentPosition = 0L
         }
+        play(currentPlay)
     }
 
     /**
      * 获取下一个可以播放的广告
      */
     private fun getNextAd(): AdInfo {
+        Logger.log("getNextAd1 ==>:" + currentPlay.fileName)
         var currentIndex = playAdList.indexOf(currentPlay)
         var next = playAdList[(++currentIndex) % playAdList.size]
         while (TextUtils.isEmpty(next.fileName) || checkDownloadName(next)) {
             next = playAdList[(++currentIndex) % playAdList.size]
         }
+        Logger.log("getNextAd2 ==>:" + next.fileName)
         return next
     }
 
@@ -302,6 +308,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
      */
     private fun play(adInfo: AdInfo) {
         Logger.log("play ==>:" + adInfo.fileName)
+        toast("开始播放 ==>:" + adInfo.fileName)
 //        toast("play :" + USBUtils.createFilePath(adInfo.fileName))
         if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo))

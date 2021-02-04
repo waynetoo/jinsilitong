@@ -14,7 +14,7 @@ class DownloadFiles {
     @Volatile
     var updateCount: Int = 0
     lateinit var taskEnd: (task: DownloadTask, cause: EndCause) -> Unit
-    var complete: (() -> Unit?)? = null
+    var allComplete: (() -> Unit?)? = null
     var progressCallback: ((String) -> Unit)? = null
 
     var currentDownloadfileName: String? = null
@@ -29,11 +29,11 @@ class DownloadFiles {
 
     constructor(
         taskEnd: (task: DownloadTask, cause: EndCause) -> Unit,
-        complete: () -> Unit,
+        allComplete: () -> Unit,
         progressCallback: (msg: String) -> Unit
     ) {
         this.taskEnd = taskEnd
-        this.complete = complete
+        this.allComplete = allComplete
         this.progressCallback = progressCallback
     }
 
@@ -54,7 +54,6 @@ class DownloadFiles {
     }
 
     fun downloadFile(adInfo: AdInfo) {
-        updateCount = 1
         val tasks: MutableList<DownloadTask> = ArrayList()
         val storeFile = USBUtils.createSdcardDir()
         val task = DownloadTask.Builder(adInfo.downloadUrl, storeFile).build()
@@ -98,16 +97,15 @@ class DownloadFiles {
                 currentDownloadfileName = null
                 Logger.log("taskEnd=>" + task.filename + " cause=" + cause)
                 //下载完成
-                --updateCount
                 taskEnd.invoke(task, cause)
-                if (cause == EndCause.COMPLETED) {
-//                  AppContext.toast(task.filename + " 下载成功," + "剩余 " + updateCount + "个")
-                } else if (cause == EndCause.ERROR) {
-                    Logger.log("taskEnd=>" + task.filename + " realCause=" + realCause)
-                }
-
+//                if (cause == EndCause.COMPLETED) {
+////                  AppContext.toast(task.filename + " 下载成功," + "剩余 " + updateCount + "个")
+//                } else if (cause == EndCause.ERROR) {
+//                    Logger.log("taskEnd=>" + task.filename + " realCause=" + realCause)
+//                }
+                --updateCount
                 if (updateCount <= 0) {
-                    complete?.invoke()
+                    allComplete?.invoke()
                 }
 //                progressCallback?.let { callback ->
 //                    callback.invoke("taskEnd=>" + task.filename + " realCause=" + realCause + "   e:" + realCause + "\n")

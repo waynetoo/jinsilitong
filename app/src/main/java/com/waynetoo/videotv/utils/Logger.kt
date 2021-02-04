@@ -1,7 +1,6 @@
 package com.waynetoo.videotv.utils
 
 import android.util.Log
-import com.waynetoo.videotv.BuildConfig
 
 /**
  * @Author: wyl
@@ -10,7 +9,7 @@ import com.waynetoo.videotv.BuildConfig
  * @UpdateRemark:
  */
 object Logger {
-    val test = BuildConfig.DEBUG
+    val test = true
     val tag = "TV_TV"
 
     fun log(msg: String) {
