@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.text.TextUtils
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
@@ -30,6 +29,7 @@ import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.system.exitProcess
 
 
 class MainActivity : BaseActivity<MainPresenter>() {
@@ -70,6 +70,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                             toast("没有找到此条码的广告")
                         } else {
                             //插入广告
+//                            appendMsg("插入广告 =>" + insertAd.fileName)
                             isInsertAd = true
                             if (playerView.isPlaying) {
                                 playerView.pause()
@@ -90,6 +91,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                     }
                 }
                 WHAT_DOWN_LOAD -> {
+//                    appendMsg(" 准备下载0  =>"+downLoadList)
                     //当前不在播放的视频
                     val find = downLoadList?.find {
                         TextUtils.isEmpty(it.fileName) && it.videoName != currentPlay.videoName
@@ -103,11 +105,14 @@ class MainActivity : BaseActivity<MainPresenter>() {
                             flushAdList = true
                             tv_speed.text = ""
                             Logger.log(" 下载完成 --确实没有了")
+//                            appendMsg(" 下载完成 --确实没有了, 等待 更新广告列表")
                         } else {
+//                            appendMsg(" 下载广告正在播放 15s后重试->  ")
                             //15s后继续下载
                             sendEmptyMessageAtTime(WHAT_DOWN_LOAD, 15_000)
                         }
                     } else {
+//                        appendMsg(" 准备下载2 =>$find")
                         download.downloadFile(find)
                     }
                 }
@@ -134,11 +139,14 @@ class MainActivity : BaseActivity<MainPresenter>() {
         download = DownloadFiles({ task, cause ->
             if (cause == EndCause.COMPLETED) {
                 insertUpdateAdSync(Constants.playAdList, playAdList, task)
+                println("insertUpdateAdSync playAdList :$playAdList")
+//                appendMsg("$task 下载 成功，下载下一个")
                 //下载下一个
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else if (cause == EndCause.CANCELED) {
-
+//                appendMsg("取消下载 downLoadList$downLoadList")
             } else {
+//                appendMsg("下载异常  cause" + cause +"  10s后重试 ")
                 handler.sendEmptyMessageDelayed(WHAT_DOWN_LOAD, 10_000)
             }
         }, {
@@ -156,6 +164,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 if (split.size > 1) {
                     if (split[0] == Constants.storeNo) {
                         if (split[1].contains("updateAd", true)) {
+//                            appendMsg("开始更新 ：" + it)
                             presenter.getAdList()
                         } else {
                             scanCode(split[1])
@@ -168,6 +177,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
     private fun initData() {
         playAdList = Constants.playAdList
         Logger.log("initData->playAdList=> $playAdList")
+//        appendMsg("initData->playAdList=> $playAdList")
         currentPlay = playAdList.first { !TextUtils.isEmpty(it.fileName) }
         play(currentPlay)
     }
@@ -205,20 +215,23 @@ class MainActivity : BaseActivity<MainPresenter>() {
             val localFiles = getLocalFiles()
             //与播放列表对比  远程有 ，播放列表没有
             downLoadList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
-            //播放列表有,远程没有
-            val updatePlayList =
-                playAdList.filterNot { play -> remoteList.any { it.md5 == play.md5 && it.id == play.id } }
+//            appendMsg("需要下载的文件：downLoadList ：$downLoadList")
             if (downLoadList!!.isNotEmpty()) {
                 Logger.log("准备下载 downLoadList$downLoadList")
                 //删除了数据
                 OkDownload.with().downloadDispatcher().cancelAll()
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
-            } else if (updatePlayList.isNotEmpty()) {
-                Logger.log("updateList$updatePlayList")
-                Logger.log("广告有删除 或者变更顺序")
-                flushAdList = true
             } else {
-                Logger.log("广告没有更新")
+                //播放列表有,远程没有
+                val updatePlayList =
+                    playAdList.filterNot { play -> remoteList.any { it.md5 == play.md5 && it.id == play.id } }
+                if (updatePlayList.isNotEmpty()) {
+                    Logger.log("updateList$updatePlayList")
+                    Logger.log("广告有删除 或者变更顺序")
+                    flushAdList = true
+                } else {
+                    Logger.log("广告没有更新")
+                }
             }
         }
     }
@@ -234,6 +247,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
             playerCallback = { playWhenReady, state ->
                 if (state == Player.STATE_ENDED) {  // 播放结束
                     Logger.log("playerCallback  播放结束" + currentPlay.fileName)
+//                    appendMsg("end 播放结束 ==>:" + currentPlay.fileName + "   " + isInsertAd)
                     if (isInsertAd) {
                         isInsertAd = false
                         playNext(true)
@@ -258,6 +272,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     override fun onDestroy() {
         super.onDestroy()
+        OkDownload.with().downloadDispatcher().cancelAll()
         stopService(mIntent)
 //        unregisterReceiver(usbBroadcastReceiver)
     }
@@ -268,16 +283,18 @@ class MainActivity : BaseActivity<MainPresenter>() {
     }
 
     private fun playNext(isRestore: Boolean = false) {
+//        appendMsg("begin  0播放下一个  ")
         //是否是恢复
         if (!isRestore) {
+//            appendMsg("begin  1播放下一个  ")
             //如果需要刷新list ，重新播放
             if (flushAdList) {
                 flushAdList = false
-                Logger.log(" flushAdList ==> initData")
-                toast(" flushAdList ==> " + Constants.playAdList)
+//                appendMsg(" flushAdList ==> initData")
                 initData()
                 return
             }
+//            appendMsg("begin  3播放下一个  ")
 // Logger.log(index.toString())
             currentPlay = getNextAd()
             currentPlay.currentPosition = 0L
@@ -290,12 +307,15 @@ class MainActivity : BaseActivity<MainPresenter>() {
      */
     private fun getNextAd(): AdInfo {
         Logger.log("getNextAd1 ==>:" + currentPlay.fileName)
+
+//        appendMsg("getNextAd1 ==>:" + currentPlay.fileName)
         var currentIndex = playAdList.indexOf(currentPlay)
         var next = playAdList[(++currentIndex) % playAdList.size]
         while (TextUtils.isEmpty(next.fileName) || checkDownloadName(next)) {
             next = playAdList[(++currentIndex) % playAdList.size]
         }
         Logger.log("getNextAd2 ==>:" + next.fileName)
+//        appendMsg("getNextAd2 ==>:" + next.fileName)
         return next
     }
 
@@ -308,7 +328,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
      */
     private fun play(adInfo: AdInfo) {
         Logger.log("play ==>:" + adInfo.fileName)
-        toast("开始播放 ==>:" + adInfo.fileName)
+//        appendMsg("开始播放 ==>:" + adInfo.fileName)
 //        toast("play :" + USBUtils.createFilePath(adInfo.fileName))
         if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo))
@@ -353,6 +373,11 @@ class MainActivity : BaseActivity<MainPresenter>() {
     fun undateAd(view: View) {
         presenter.getAdList()
     }
+//
+//    fun appendMsg(mgs: String) {
+//        print_msg.append(mgs + "\n")
+//        print_msg.post {   scroller.fullScroll(View.FOCUS_DOWN);}
+//    }
 
     /**
      * 通过监听keyUp   实现双击返回键退出程序
@@ -371,6 +396,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 return true
             } else {
                 finish()
+                exitProcess(0)
             }
         }
         return super.onKeyUp(keyCode, event)

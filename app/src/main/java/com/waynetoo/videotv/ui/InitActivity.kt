@@ -171,6 +171,16 @@ class InitActivity : BaseActivity<BinderPresenter>() {
 
             // 预加载的 播放列表
             Constants.playAdList = remoteList
+
+//            toast("remoteList.size :" + remoteList.size + "    updateList.size:" + updateList.size)
+//            print_msg.append("remoteList  =  " + remoteList)
+//            print_msg.append("updateList  =  " + updateList)
+//            print_msg.append("remoteList.size :" + remoteList.size + "    updateList.size:" + updateList.size)
+//            print_msg.post {
+//                scroller.fullScroll(View.FOCUS_DOWN);
+//            }
+
+
             //播放的广告，本地一个也没有
             if (remoteList.size != updateList.size) {
                 startActivity(Intent(this@InitActivity, MainActivity::class.java))
@@ -258,6 +268,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
                 return true
             } else {
                 finish()
+                System.exit(0)
             }
         }
         return super.onKeyUp(keyCode, event)

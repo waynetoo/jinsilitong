@@ -37,7 +37,6 @@ class DownloadFiles {
         this.progressCallback = progressCallback
     }
 
-
     /**
      * 下载文件
      * 下载到sd卡中
@@ -67,12 +66,6 @@ class DownloadFiles {
 
             override fun taskStart(task: DownloadTask) {
                 Logger.log("taskStart=>" + task.filename)
-//                AppContext.toast("taskStart=>" + task.filename)
-//
-//                progressCallback?.let { callback ->
-//                    callback.invoke("taskStart=>" + task.filename + "\n")
-//                }
-
             }
 
             override fun blockEnd(
@@ -81,11 +74,6 @@ class DownloadFiles {
                 info: BlockInfo?,
                 blockSpeed: SpeedCalculator
             ) {
-//                Logger.log("blockEnd=>" + task.filename)
-//                progressCallback?.let { callback ->
-//                    callback.invoke("blockEnd=>" + task.filename + "\n")
-//                }
-//                AppContext.toast("blockEnd=>" + task.filename)
             }
 
             override fun taskEnd(

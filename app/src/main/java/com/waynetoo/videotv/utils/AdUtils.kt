@@ -37,7 +37,7 @@ suspend fun fetchData(): String {
 
 suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
     val createUsbDir = USBUtils.createUsbDir()
-    val createSdcardDir = USBUtils.createUsbDir()
+    val createSdcardDir = USBUtils.createSdcardDir()
     val localList = arrayListOf<LocalFileAd>()
     //usb中的
     createUsbDir.listFiles()?.forEach {

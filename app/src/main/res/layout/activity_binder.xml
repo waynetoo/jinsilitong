@@ -68,17 +68,17 @@
         android:textColor="@color/white"
         android:textSize="18sp"></TextView>
 
-    <!--    <ScrollView-->
-    <!--        android:id="@+id/scroller"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="match_parent">-->
-    <!--        <TextView-->
-    <!--            android:id="@+id/print_msg"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_alignParentBottom="true"-->
-    <!--            android:layout_marginBottom="10dp" />-->
+<!--        <ScrollView-->
+<!--            android:id="@+id/scroller"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent">-->
+<!--            <TextView-->
+<!--                android:id="@+id/print_msg"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_alignParentBottom="true"-->
+<!--                android:layout_marginBottom="10dp" />-->
 
-    <!--    </ScrollView>-->
+<!--        </ScrollView>-->
 
 </RelativeLayout>
