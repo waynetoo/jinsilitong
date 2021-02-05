@@ -47,7 +47,7 @@ class DownloadFiles {
         updateCount = updateList.size
         val tasks: MutableList<DownloadTask> = ArrayList()
         val storeFile = USBUtils.createSdcardDir()
-        AppContext.toast("storeFIile" + storeFile.absolutePath + " wr=" + storeFile.canWrite())
+//        AppContext.toast("storeFIile" + storeFile.absolutePath + " wr=" + storeFile.canWrite())
         for (ad in updateList) {
             val task = DownloadTask.Builder(ad.downloadUrl, storeFile).build()
             tasks.add(task)
@@ -87,7 +87,7 @@ class DownloadFiles {
             ) {
                 currentDownloadfileName = null
                 Logger.log("taskEnd=>" + task.filename + " cause=" + cause)
-                AppContext.toast("taskEnd=>" + task.filename + " cause=" + cause + "  realCause:" + realCause)
+//                AppContext.toast("taskEnd=>" + task.filename + " cause=" + cause + "  realCause:" + realCause)
                 //下载完成
                 taskEnd.invoke(task, cause)
 //                if (cause == EndCause.COMPLETED) {

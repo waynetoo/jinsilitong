@@ -69,14 +69,18 @@ class MyMqttService : Service() {
     private fun init() {
         val serverURI = HOST //服务器地址（协议+地址+端口号）
         mqttAndroidClient = MqttAndroidClient(this, serverURI, CLIENTID)
+            .apply {
+                setCallback(mqttCallback) //设置监听订阅消息的回调
+                mMqttConnectOptions = MqttConnectOptions()
+                    .apply {
+                        isCleanSession = true //设置是否清除缓存
+//        mMqttConnectOptions!!.connectionTimeout = 10 //设置超时时间，单位：秒   默认30s
+//        mMqttConnectOptions!!.keepAliveInterval = 20 //设置心跳包发送间隔，单位：秒  默认60
+                        userName = USERNAME //设置用户名
+                        password = PASSWORD.toCharArray() //设置密码
+                    }
+            }
         Logger.log("CLIENTID: $CLIENTID")
-        mqttAndroidClient!!.setCallback(mqttCallback) //设置监听订阅消息的回调
-        mMqttConnectOptions = MqttConnectOptions()
-        mMqttConnectOptions!!.isCleanSession = true //设置是否清除缓存
-        mMqttConnectOptions!!.connectionTimeout = 10 //设置超时时间，单位：秒
-        mMqttConnectOptions!!.keepAliveInterval = 20 //设置心跳包发送间隔，单位：秒
-        mMqttConnectOptions!!.userName = USERNAME //设置用户名
-        mMqttConnectOptions!!.password = PASSWORD.toCharArray() //设置密码
 
         // last will message
         var doConnect = true

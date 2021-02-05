@@ -2,16 +2,13 @@ package com.waynetoo.videotv.ui
 
 import android.Manifest
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.storage.StorageManager
+import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.waynetoo.lib_common.extentions.checkPermissions
-import com.waynetoo.lib_common.extentions.isIntentExisting
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
@@ -20,11 +17,8 @@ import com.waynetoo.videotv.model.AdInfo
 import com.waynetoo.videotv.presenter.BinderPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
 import com.waynetoo.videotv.utils.*
-import com.waynetoo.videotv.utils.DocumentsUtils.saveTreeUri
 import kotlinx.android.synthetic.main.activity_binder.*
 import kotlinx.coroutines.launch
-import java.io.File
-
 
 /**
  *
@@ -157,7 +151,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         ll_binder.visibility = View.GONE
         msg.visibility = View.VISIBLE
         if (remoteList.isEmpty()) {
-            msg.text = "广告列表为空，请添加广告 。。"
+            msg.text = "广告列表为空，请添加广告 。。."
             return
         }
         launch {
@@ -204,6 +198,10 @@ class InitActivity : BaseActivity<BinderPresenter>() {
     }
 
     private fun downloadSuccess() {
+        if (null == Constants.playAdList.find { !TextUtils.isEmpty(it.fileName) }) {
+            toast("本地一个广告也没有哎。。。")
+            return
+        }
         startActivity(Intent(this@InitActivity, MainActivity::class.java))
         finish()
     }
@@ -259,7 +257,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
     //记录用户首次点击返回键的时间
     private var firstTime: Long = 0
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() === KeyEvent.ACTION_UP) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.action === KeyEvent.ACTION_UP) {
             val secondTime = System.currentTimeMillis()
             if (secondTime - firstTime > 2000) {
                 Toast.makeText(applicationContext, "再按一次退出程序", Toast.LENGTH_SHORT).show()
