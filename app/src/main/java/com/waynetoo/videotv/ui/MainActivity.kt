@@ -70,7 +70,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                             toast("没有找到此条码的广告")
                         } else {
                             //插入广告
-//                            appendMsg("插入广告 =>" + insertAd.fileName)
+                            appendMsg("插入播放广告 =>" + insertAd.fileName)
                             isInsertAd = true
                             if (playerView.isPlaying) {
                                 playerView.pause()
@@ -310,17 +310,19 @@ class MainActivity : BaseActivity<MainPresenter>() {
 //        appendMsg("begin  0播放下一个  ")
         //不是恢复
         if (!isRestore) {
-//            appendMsg("begin  1播放下一个  ")
             //如果需要刷新list ，重新播放
             if (flushAdList) {
                 flushAdList = false
-//                appendMsg(" flushAdList ==> initData")
+                appendMsg(" 更新广告列表，从头开始播放")
+                Logger.log(" 更新广告列表，从头开始播放")
                 initData()
                 return
             }
-//            appendMsg("begin  3播放下一个  ")
             currentPlay = getNextAd()
             currentPlay.currentPosition = 0L
+        } else {
+            appendMsg(" 恢复播放原广告---")
+            Logger.log(" 恢复播放原广告---")
         }
         play(currentPlay)
     }
@@ -355,7 +357,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
         if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo))
             playerView.start()
-            if(!isInsertAd) {
+            if (!isInsertAd) {
                 playerView.seekTo(adInfo.currentPosition)
             }
 //            Logger.log("seekTo :" + adInfo.currentPosition)
