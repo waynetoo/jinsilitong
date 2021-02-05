@@ -25,7 +25,11 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <uses-feature
+        android:name="android.hardware.type.television"
+        android:required="true"></uses-feature>
     <application
         android:name=".app.Application"
         android:allowBackup="true"
@@ -38,6 +42,7 @@
 
         <activity
             android:name=".ui.MainActivity"
+            android:keepScreenOn="true"
             android:launchMode="singleTask"
             android:screenOrientation="landscape"></activity>
         <activity
