@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.text.TextUtils
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
@@ -309,7 +308,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     private fun playNext(isRestore: Boolean = false) {
 //        appendMsg("begin  0播放下一个  ")
-        //是否是恢复
+        //不是恢复
         if (!isRestore) {
 //            appendMsg("begin  1播放下一个  ")
             //如果需要刷新list ，重新播放
@@ -356,7 +355,9 @@ class MainActivity : BaseActivity<MainPresenter>() {
         if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo))
             playerView.start()
-            playerView.seekTo(adInfo.currentPosition)
+            if(!isInsertAd) {
+                playerView.seekTo(adInfo.currentPosition)
+            }
 //            Logger.log("seekTo :" + adInfo.currentPosition)
             if (!playerView.isVisible) {
                 playerView.visibility = View.VISIBLE

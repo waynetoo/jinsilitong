@@ -33,7 +33,7 @@ class MyMqttService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Logger.log(TAG + "onStartCommand  " + flags + "  intent=" + intent)
         init()
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     @Nullable
