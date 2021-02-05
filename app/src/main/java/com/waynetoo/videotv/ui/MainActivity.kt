@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.text.TextUtils
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
@@ -105,7 +106,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                             flushAdList = true
                             tv_speed.text = ""
                             Logger.log(" 下载完成 --确实没有了")
-//                            appendMsg(" 下载完成 --确实没有了, 等待 更新广告列表")
+                            appendMsg(" 下载完成 -- 等待 更新广告列表")
                         } else {
 //                            appendMsg(" 下载广告正在播放 15s后重试->  ")
                             //15s后继续下载
@@ -125,6 +126,10 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        getWindow().setFlags(
+            android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
         setContentView(R.layout.activity_main)
         initVideoComponent()
         initDownLoaderListener()
@@ -140,7 +145,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
             if (cause == EndCause.COMPLETED) {
                 insertUpdateAdSync(Constants.playAdList, playAdList, task)
                 println("insertUpdateAdSync playAdList :$playAdList")
-//                appendMsg("$task 下载 成功，下载下一个")
+                appendMsg("${task.filename} 下载 成功")
                 //下载下一个
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else if (cause == EndCause.CANCELED) {
@@ -218,6 +223,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
 //            appendMsg("需要下载的文件：downLoadList ：$downLoadList")
             if (downLoadList!!.isNotEmpty()) {
                 Logger.log("准备下载 downLoadList$downLoadList")
+                appendMsg("准备下载 downLoadList$downLoadList")
                 //删除了数据
                 OkDownload.with().downloadDispatcher().cancelAll()
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
@@ -247,7 +253,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
             playerCallback = { playWhenReady, state ->
                 if (state == Player.STATE_ENDED) {  // 播放结束
                     Logger.log("playerCallback  播放结束" + currentPlay.fileName)
-//                    appendMsg("end 播放结束 ==>:" + currentPlay.fileName + "   " + isInsertAd)
                     if (isInsertAd) {
                         isInsertAd = false
                         playNext(true)
@@ -257,11 +262,32 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 } else {
                     if (state == Player.STATE_READY && playWhenReady) {  // 播放中
                         Logger.log("playerCallback  播放中")
+//                        appendMsg("playerCallback==>:" + currentPlay.fileName + "   播放中"  )
                     } else if (state == Player.STATE_READY && !playWhenReady) {  // 暂停中
                         Logger.log("playerCallback  暂停中")
+//                        appendMsg("playerCallback ==>:" + currentPlay.fileName + "   暂停中"  )
                         //?
                     }
                 }
+
+
+                when (state) {
+                    Player.STATE_BUFFERING -> {
+//                        Log.d(TAG_VIDEO, "onPlayerStateChanged - STATE_BUFFERING")
+                        appendMsg("playerCallback ==>:" + currentPlay.fileName + "   STATE_BUFFERING")
+                    }
+                    Player.STATE_READY -> {
+//                        Log.d(TAG_VIDEO, "onPlayerStateChanged - STATE_READY")
+                        appendMsg("playerCallback ==>:" + currentPlay.fileName + "   STATE_READY    " + playWhenReady)
+                    }
+                    Player.STATE_IDLE -> {
+                        appendMsg("playerCallback==>:" + currentPlay.fileName + "   STATE_IDLE")
+                    }
+                    Player.STATE_ENDED -> {
+                        appendMsg("playerCallback ==>:" + currentPlay.fileName + "   STATE_ENDED")
+                    }
+                }
+
             }
         }
     }
@@ -308,14 +334,14 @@ class MainActivity : BaseActivity<MainPresenter>() {
     private fun getNextAd(): AdInfo {
         Logger.log("getNextAd1 ==>:" + currentPlay.fileName)
 
-//        appendMsg("getNextAd1 ==>:" + currentPlay.fileName)
+        appendMsg("getNextAd1 ==>:" + currentPlay.fileName)
         var currentIndex = playAdList.indexOf(currentPlay)
         var next = playAdList[(++currentIndex) % playAdList.size]
         while (TextUtils.isEmpty(next.fileName) || checkDownloadName(next)) {
             next = playAdList[(++currentIndex) % playAdList.size]
         }
         Logger.log("getNextAd2 ==>:" + next.fileName)
-//        appendMsg("getNextAd2 ==>:" + next.fileName)
+        appendMsg("getNextAd2 ==>:" + next.fileName)
         return next
     }
 
@@ -328,7 +354,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
      */
     private fun play(adInfo: AdInfo) {
         Logger.log("play ==>:" + adInfo.fileName)
-//        appendMsg("开始播放 ==>:" + adInfo.fileName)
+        appendMsg("开始播放 ==>:" + USBUtils.createFilePath(adInfo))
 //        toast("play :" + USBUtils.createFilePath(adInfo.fileName))
         if (adInfo.fileName.isVideo()) {
             playerView.setSource(USBUtils.createFilePath(adInfo))
@@ -373,11 +399,12 @@ class MainActivity : BaseActivity<MainPresenter>() {
     fun undateAd(view: View) {
         presenter.getAdList()
     }
-//
-//    fun appendMsg(mgs: String) {
-//        print_msg.append(mgs + "\n")
-//        print_msg.post {   scroller.fullScroll(View.FOCUS_DOWN);}
-//    }
+
+    //
+    fun appendMsg(mgs: String) {
+        print_msg.append(mgs + "\n")
+        print_msg.post { scroller.fullScroll(View.FOCUS_DOWN); }
+    }
 
     /**
      * 通过监听keyUp   实现双击返回键退出程序
