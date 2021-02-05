@@ -203,7 +203,6 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         }
     }
 
-
     private fun downloadSuccess() {
         startActivity(Intent(this@InitActivity, MainActivity::class.java))
         finish()

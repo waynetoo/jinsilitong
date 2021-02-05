@@ -38,30 +38,25 @@ suspend fun fetchData(): String {
 suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
     val createUsbDir = USBUtils.createUsbDir()
     val createSdcardDir = USBUtils.createSdcardDir()
-    val localList = arrayListOf<LocalFileAd>()
+//    val localList = arrayListOf<LocalFileAd>()
+    val localList = HashMap<String, LocalFileAd>()
     //usb中的
     createUsbDir.listFiles()?.forEach {
-        localList.add(
-            LocalFileAd(
-                it.fileMd5(),
-                it.name,
-                it.absolutePath,
-                true
-            )
+        localList[it.fileMd5()] = LocalFileAd(
+            it.fileMd5(),
+            it.name,
+            it.absolutePath,
+            true
         )
     }
     //sdcard中的
-    if (createUsbDir.path != createSdcardDir.path) {
-        createSdcardDir.listFiles()?.forEach {
-            localList.add(
-                LocalFileAd(
-                    it.fileMd5(),
-                    it.name,
-                    it.absolutePath,
-                    false
-                )
-            )
-        }
+    createSdcardDir.listFiles()?.forEach {
+        localList[it.fileMd5()] = LocalFileAd(
+            it.fileMd5(),
+            it.name,
+            it.absolutePath,
+            false
+        )
     }
     Logger.log("localFiles :$localList")
     localList
@@ -71,15 +66,15 @@ suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
  * 删除文件
  */
 suspend fun deleteFiles(
-    localFiles: ArrayList<LocalFileAd>,
+    localFiles: HashMap<String, LocalFileAd>,
     remoteList: List<AdInfo>
 ) = withContext(Dispatchers.IO) {
-    localFiles.filterNot { local -> remoteList.any { it.md5 == local.md5 } }
+    localFiles.filterKeys { key -> !remoteList.any { it.md5 == key } }
         .forEach {
             //删除数据库 和文件
-            if (!it.isUsbPath) {
-                Logger.log("删除文件：" + it.filePath)
-                File(it.filePath).delete()
+            if (!it.value.isUsbPath) {
+                Logger.log("删除文件：" + it.value.filePath)
+                File(it.value.filePath).delete()
             }
         }
 }
@@ -89,13 +84,13 @@ suspend fun deleteFiles(
  * 本地的 文件  copyFileName 到
  */
 suspend fun syncLocal2RemoteAndObtainUpdateList(
-    localFiles: ArrayList<LocalFileAd>,
+    localFiles: HashMap<String, LocalFileAd>,
     remoteList: List<AdInfo>
 ) =
     withContext(Dispatchers.IO) {
         val updateList = arrayListOf<AdInfo>()
         remoteList.forEach { remote ->
-            val find = localFiles.find { it.md5 == remote.md5 }
+            val find = localFiles[remote.md5]
             if (find == null) {
                 updateList.add(remote)
             } else {

@@ -12,7 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitCenter"
-        android:src="@drawable/app_icon_your_company"
         android:visibility="gone" />
 
     <com.waynetoo.videotv.player.SimplePlayerView

@@ -42,7 +42,6 @@
 
         <activity
             android:name=".ui.MainActivity"
-            android:keepScreenOn="true"
             android:launchMode="singleTask"
             android:screenOrientation="landscape"></activity>
         <activity

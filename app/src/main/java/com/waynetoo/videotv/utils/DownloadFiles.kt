@@ -7,6 +7,8 @@ import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.listener.DownloadListener4WithSpeed
 import com.liulishuo.okdownload.core.listener.assist.Listener4SpeedAssistExtend
+import com.waynetoo.lib_common.AppContext
+import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.videotv.model.AdInfo
 
 class DownloadFiles {
@@ -45,6 +47,7 @@ class DownloadFiles {
         updateCount = updateList.size
         val tasks: MutableList<DownloadTask> = ArrayList()
         val storeFile = USBUtils.createSdcardDir()
+        AppContext.toast("storeFIile" + storeFile.absolutePath + " wr=" + storeFile.canWrite())
         for (ad in updateList) {
             val task = DownloadTask.Builder(ad.downloadUrl, storeFile).build()
             tasks.add(task)
@@ -84,6 +87,7 @@ class DownloadFiles {
             ) {
                 currentDownloadfileName = null
                 Logger.log("taskEnd=>" + task.filename + " cause=" + cause)
+                AppContext.toast("taskEnd=>" + task.filename + " cause=" + cause + "  realCause:" + realCause)
                 //下载完成
                 taskEnd.invoke(task, cause)
 //                if (cause == EndCause.COMPLETED) {

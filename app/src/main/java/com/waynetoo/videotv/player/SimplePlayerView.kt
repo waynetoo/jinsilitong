@@ -179,7 +179,6 @@ open class SimplePlayerView : PlayerView, IPlayer {
         super.setVisibility(visibility)
         if (visibility == View.GONE) {
             Logger.log(" isReady :" + player?.playWhenReady)
-//            pause()
         }
     }
 }

@@ -92,7 +92,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                     }
                 }
                 WHAT_DOWN_LOAD -> {
-//                    appendMsg(" 准备下载0  =>"+downLoadList)
+//                    appendMsg(" 准备下载  =>"+downLoadList)
                     //当前不在播放的视频
                     val find = downLoadList?.find {
                         TextUtils.isEmpty(it.fileName) && it.videoName != currentPlay.videoName
@@ -110,10 +110,11 @@ class MainActivity : BaseActivity<MainPresenter>() {
                         } else {
 //                            appendMsg(" 下载广告正在播放 15s后重试->  ")
                             //15s后继续下载
+                            removeMessages(WHAT_DOWN_LOAD)
                             sendEmptyMessageAtTime(WHAT_DOWN_LOAD, 15_000)
                         }
                     } else {
-//                        appendMsg(" 准备下载2 =>$find")
+                        appendMsg(" 准备下载 =>${find.fileName}")
                         download.downloadFile(find)
                     }
                 }
@@ -126,8 +127,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getWindow().setFlags(
-            android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+        window.addFlags(
             android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
         setContentView(R.layout.activity_main)
@@ -147,11 +147,13 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 println("insertUpdateAdSync playAdList :$playAdList")
                 appendMsg("${task.filename} 下载 成功")
                 //下载下一个
+                handler.removeMessages(WHAT_DOWN_LOAD)
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else if (cause == EndCause.CANCELED) {
 //                appendMsg("取消下载 downLoadList$downLoadList")
             } else {
 //                appendMsg("下载异常  cause" + cause +"  10s后重试 ")
+                handler.removeMessages(WHAT_DOWN_LOAD)
                 handler.sendEmptyMessageDelayed(WHAT_DOWN_LOAD, 10_000)
             }
         }, {
@@ -215,8 +217,8 @@ class MainActivity : BaseActivity<MainPresenter>() {
             return
         }
         //播放列表
-        Constants.playAdList = remoteList
         launch {
+            Constants.playAdList = remoteList
             val localFiles = getLocalFiles()
             //与播放列表对比  远程有 ，播放列表没有
             downLoadList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
@@ -226,6 +228,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 appendMsg("准备下载 downLoadList$downLoadList")
                 //删除了数据
                 OkDownload.with().downloadDispatcher().cancelAll()
+                handler.removeMessages(WHAT_DOWN_LOAD)
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else {
                 //播放列表有,远程没有
@@ -240,10 +243,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     private fun initVideoComponent() {
@@ -321,7 +320,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 return
             }
 //            appendMsg("begin  3播放下一个  ")
-// Logger.log(index.toString())
             currentPlay = getNextAd()
             currentPlay.currentPosition = 0L
         }
@@ -333,7 +331,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
      */
     private fun getNextAd(): AdInfo {
         Logger.log("getNextAd1 ==>:" + currentPlay.fileName)
-
         appendMsg("getNextAd1 ==>:" + currentPlay.fileName)
         var currentIndex = playAdList.indexOf(currentPlay)
         var next = playAdList[(++currentIndex) % playAdList.size]
@@ -367,7 +364,8 @@ class MainActivity : BaseActivity<MainPresenter>() {
             }
         } else {
             //暂停视频
-            Glide.with(this).load(File(USBUtils.createFilePath(adInfo))).into(imageView)
+            Glide.with(this).load(File(USBUtils.createFilePath(adInfo))).dontAnimate()
+                .placeholder(imageView.drawable).into(imageView)
             handler.removeMessages(WHAT_DELAY_PIC_END)
             handler.sendEmptyMessageDelayed(WHAT_DELAY_PIC_END, PIC_SHOW_TIME)
             if (playerView.isVisible) {
