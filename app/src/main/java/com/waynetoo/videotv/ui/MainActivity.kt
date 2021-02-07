@@ -108,6 +108,13 @@ class MainActivity : BaseActivity<MainPresenter>() {
                             tv_speed.text = ""
                             Logger.log(" 下载完成 --确实没有了")
                             appendMsg(" 下载完成 -- 等待 更新广告列表")
+                            launch {
+                                //清除Glide缓存
+                                withContext(Dispatchers.IO) {
+                                    Glide.get(this@MainActivity).clearDiskCache()
+                                }
+                                Glide.get(this@MainActivity).clearMemory()
+                            }
                         } else {
 //                            appendMsg(" 下载广告正在播放 15s后重试->  ")
                             //15s后继续下载
@@ -230,11 +237,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 appendMsg("准备下载 downLoadList$downLoadList")
                 //删除了数据
                 OkDownload.with().downloadDispatcher().cancelAll()
-                //清除Glide缓存
-                withContext(Dispatchers.IO) {
-                    Glide.get(this@MainActivity).clearDiskCache()
-                }
-                Glide.get(this@MainActivity).clearMemory()
                 handler.removeMessages(WHAT_DOWN_LOAD)
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else {
