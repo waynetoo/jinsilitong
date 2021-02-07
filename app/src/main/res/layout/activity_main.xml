@@ -69,17 +69,17 @@
     <!--        </LinearLayout>-->
 
 
-        <ScrollView
-            android:id="@+id/scroller"
-            android:layout_width="500dp"
-            android:background="#80778088"
-            android:layout_height="match_parent"
-            android:layout_gravity="right|bottom">
+<!--        <ScrollView-->
+<!--            android:id="@+id/scroller"-->
+<!--            android:layout_width="500dp"-->
+<!--            android:background="#80778088"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_gravity="right|bottom">-->
 
-            <TextView
-                android:id="@+id/print_msg"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+<!--            <TextView-->
+<!--                android:id="@+id/print_msg"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent" />-->
 
-        </ScrollView>
+<!--        </ScrollView>-->
 </FrameLayout>

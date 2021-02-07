@@ -74,8 +74,8 @@ class MyMqttService : Service() {
                 mMqttConnectOptions = MqttConnectOptions()
                     .apply {
                         isCleanSession = true //设置是否清除缓存
-//        mMqttConnectOptions!!.connectionTimeout = 10 //设置超时时间，单位：秒   默认30s
-//        mMqttConnectOptions!!.keepAliveInterval = 20 //设置心跳包发送间隔，单位：秒  默认60
+//                      connectionTimeout = 10 //设置超时时间，单位：秒   默认30s
+                        keepAliveInterval = 40 //设置心跳包发送间隔，单位：秒  默认60
                         userName = USERNAME //设置用户名
                         password = PASSWORD.toCharArray() //设置密码
                     }

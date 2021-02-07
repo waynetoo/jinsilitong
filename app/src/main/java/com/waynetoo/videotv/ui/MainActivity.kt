@@ -27,7 +27,9 @@ import com.waynetoo.videotv.presenter.MainPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
 import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -221,12 +223,18 @@ class MainActivity : BaseActivity<MainPresenter>() {
             val localFiles = getLocalFiles()
             //与播放列表对比  远程有 ，播放列表没有
             downLoadList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
+
 //            appendMsg("需要下载的文件：downLoadList ：$downLoadList")
             if (downLoadList!!.isNotEmpty()) {
                 Logger.log("准备下载 downLoadList$downLoadList")
                 appendMsg("准备下载 downLoadList$downLoadList")
                 //删除了数据
                 OkDownload.with().downloadDispatcher().cancelAll()
+                //清除Glide缓存
+                withContext(Dispatchers.IO) {
+                    Glide.get(this@MainActivity).clearDiskCache()
+                }
+                Glide.get(this@MainActivity).clearMemory()
                 handler.removeMessages(WHAT_DOWN_LOAD)
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else {
@@ -403,8 +411,8 @@ class MainActivity : BaseActivity<MainPresenter>() {
 
     //
     fun appendMsg(mgs: String) {
-        print_msg.append(mgs + "\n")
-        print_msg.post { scroller.fullScroll(View.FOCUS_DOWN); }
+//        print_msg.append(mgs + "\n")
+//        print_msg.post { scroller.fullScroll(View.FOCUS_DOWN); }
     }
 
     /**
