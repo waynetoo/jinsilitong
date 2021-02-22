@@ -345,7 +345,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
         appendMsg("getNextAd1 ==>:" + currentPlay.fileName)
         var currentIndex = playAdList.indexOf(currentPlay)
         var next = playAdList[(++currentIndex) % playAdList.size]
-        while (TextUtils.isEmpty(next.fileName) || checkDownloadName(next)) {
+        while (TextUtils.isEmpty(next.fileName) || checkDownloadName(next) || next.id < 0) {
             next = playAdList[(++currentIndex) % playAdList.size]
         }
         Logger.log("getNextAd2 ==>:" + next.fileName)

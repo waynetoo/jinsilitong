@@ -4,7 +4,7 @@ data class AdInfo(
     var md5: String = "",
     //不包含后缀名的name
     var videoName: String = "",
-    var id: String = "",
+    var id: Int = 0,
     var storeNo: String? = "",
     var downloadUrl: String = "",
     var modifiedTimes: String = "",
