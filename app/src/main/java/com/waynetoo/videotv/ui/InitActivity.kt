@@ -7,6 +7,7 @@ import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
+import com.bumptech.glide.Glide
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.waynetoo.lib_common.extentions.checkPermissions
 import com.waynetoo.lib_common.extentions.toast
@@ -18,7 +19,9 @@ import com.waynetoo.videotv.presenter.BinderPresenter
 import com.waynetoo.videotv.receiver.USBBroadcastReceiver
 import com.waynetoo.videotv.utils.*
 import kotlinx.android.synthetic.main.activity_binder.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  *
@@ -157,6 +160,11 @@ class InitActivity : BaseActivity<BinderPresenter>() {
         launch {
             msg.text = "校验广告中。。。"
             showProgressDialog()
+            //清除Glide缓存
+            withContext(Dispatchers.IO) {
+                Glide.get(this@InitActivity).clearDiskCache()
+            }
+            Glide.get(this@InitActivity).clearMemory()
 
             val localFiles = getLocalFiles()
             val updateList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
