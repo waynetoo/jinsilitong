@@ -243,7 +243,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 //播放列表有,远程没有
 //                id=-1的时候，代表这个视频不属于播放列表，只下载到本地。。如果id=1，2，3。。代表这个视频加入播放列表，同时下载
                 val updatePlayList =
-                    playAdList.filterNot { play -> remoteList.any { play.fileName.contains(it.videoName) && it.md5 == play.md5 && it.id == play.id } }
+                    playAdList.filterNot { play -> remoteList.any { play.fileName.startsWith(it.videoName) && it.md5 == play.md5 && it.id == play.id } }
                 if (updatePlayList.isNotEmpty()) {
                     Logger.log("updateList$updatePlayList")
                     Logger.log("广告有删除 或者变更顺序")
@@ -394,7 +394,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
 //        6901028936477
 //        扫码 获得的code
         val code = playAdList[(playAdList.indices).random() % playAdList.size].videoName
-        scanCode(code)
+        scanCode("6901028155915")
     }
 
     private fun scanCode(code: String) {

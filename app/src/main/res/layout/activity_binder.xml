@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_browse_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -50,13 +51,24 @@
     </LinearLayout>
 
     <TextView
-    android:id="@+id/msg"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerInParent="true"
-    android:textColor="@color/black"
-    android:textSize="32sp"
-    android:visibility="gone"></TextView>
+        android:id="@+id/version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="20dp"
+        tools:text="123456"
+        android:textColor="@color/black"
+        android:textSize="32sp"></TextView>
+
+    <TextView
+        android:id="@+id/msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        android:visibility="gone"></TextView>
 
     <TextView
         android:id="@+id/progress"
@@ -68,17 +80,17 @@
         android:textColor="@color/white"
         android:textSize="18sp"></TextView>
 
-<!--        <ScrollView-->
-<!--            android:id="@+id/scroller"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="match_parent">-->
-<!--            <TextView-->
-<!--                android:id="@+id/print_msg"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_alignParentBottom="true"-->
-<!--                android:layout_marginBottom="10dp" />-->
+    <!--        <ScrollView-->
+    <!--            android:id="@+id/scroller"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="match_parent">-->
+    <!--            <TextView-->
+    <!--                android:id="@+id/print_msg"-->
+    <!--                android:layout_width="wrap_content"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_alignParentBottom="true"-->
+    <!--                android:layout_marginBottom="10dp" />-->
 
-<!--        </ScrollView>-->
+    <!--        </ScrollView>-->
 
 </RelativeLayout>

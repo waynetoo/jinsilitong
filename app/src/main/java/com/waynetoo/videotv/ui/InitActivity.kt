@@ -10,6 +10,8 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.waynetoo.lib_common.extentions.checkPermissions
+import com.waynetoo.lib_common.extentions.getAppVersionCode
+import com.waynetoo.lib_common.extentions.getAppVersionName
 import com.waynetoo.lib_common.extentions.toast
 import com.waynetoo.lib_common.lifecycle.BaseActivity
 import com.waynetoo.videotv.R
@@ -37,6 +39,7 @@ class InitActivity : BaseActivity<BinderPresenter>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_binder)
+        version.text = "当前版本：" + application.getAppVersionName()
         initListeners()
 //        registerReceiver()
         checkPermissions(

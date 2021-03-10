@@ -56,7 +56,7 @@ suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
             )
         )
     }
-    Logger.log("localFiles :$localList")
+//    Logger.log("localFiles :$localList")
     localList
 }
 
@@ -68,7 +68,7 @@ suspend fun deleteFiles(
     remoteList: List<AdInfo>
 ) = withContext(Dispatchers.IO) {
     val deleteFiles = arrayListOf<LocalFileAd>()
-    localFiles.filter { local -> !remoteList.any { local.fileName.contains(it.videoName) && it.md5 == it.md5 } }
+    localFiles.filter { local -> !remoteList.any { local.fileName.startsWith(it.videoName) && it.md5 == it.md5 } }
         .forEach {
             //删除数据库 和文件
             if (!it.isUsbPath) {
@@ -93,10 +93,12 @@ suspend fun syncLocal2RemoteAndObtainUpdateList(
 ) =
     withContext(Dispatchers.IO) {
         val updateList = arrayListOf<AdInfo>()
+        Logger.log("remoteList :${remoteList.size} => $remoteList")
+        Logger.log("localFiles :${localFiles.size} => $localFiles")
         remoteList.forEach { remote ->
             //md5 和 名字都要对上 ，存在md5相同，名字不同的情况
             val find =
-                localFiles.find { it.fileName.contains(remote.videoName) && it.md5 == remote.md5 }
+                localFiles.find { it.fileName.startsWith(remote.videoName) && it.md5 == remote.md5 }
             if (find == null) {
                 updateList.add(remote)
             } else {
