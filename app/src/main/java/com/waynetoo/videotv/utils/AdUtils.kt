@@ -8,10 +8,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileInputStream
 import java.math.BigInteger
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
 import java.security.MessageDigest
-import kotlin.experimental.and
 
 /**
  * @Author: weiyunl
@@ -20,14 +17,11 @@ import kotlin.experimental.and
  * @UpdateRemark:
  */
 
-
 fun checkUpdate() {
     var job = GlobalScope.launch(Dispatchers.Main) {
         var content = fetchData()
         Log.d("Coroutine", content)
     }
-
-
 }
 
 suspend fun fetchData(): String {
@@ -39,23 +33,27 @@ suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
     val createUsbDir = USBUtils.createUsbDir()
     val createSdcardDir = USBUtils.createSdcardDir()
 //    val localList = arrayListOf<LocalFileAd>()
-    val localList = HashMap<String, LocalFileAd>()
-    //usb中的
+    val localList = mutableListOf<LocalFileAd>()
+    //usb中的  md5 会有重复的，用filename作为key  fileName=6901028121828.jpg
     createUsbDir.listFiles()?.forEach {
-        localList[it.fileMd5()] = LocalFileAd(
-            it.fileMd5(),
-            it.name,
-            it.absolutePath,
-            true
+        localList.add(
+            LocalFileAd(
+                it.fileMd5(),
+                it.name,
+                it.absolutePath,
+                true
+            )
         )
     }
     //sdcard中的
     createSdcardDir.listFiles()?.forEach {
-        localList[it.fileMd5()] = LocalFileAd(
-            it.fileMd5(),
-            it.name,
-            it.absolutePath,
-            false
+        localList.add(
+            LocalFileAd(
+                it.fileMd5(),
+                it.name,
+                it.absolutePath,
+                false
+            )
         )
     }
     Logger.log("localFiles :$localList")
@@ -66,17 +64,22 @@ suspend fun getLocalFiles() = withContext(Dispatchers.IO) {
  * 删除文件
  */
 suspend fun deleteFiles(
-    localFiles: HashMap<String, LocalFileAd>,
+    localFiles: MutableList<LocalFileAd>,
     remoteList: List<AdInfo>
 ) = withContext(Dispatchers.IO) {
-    localFiles.filterKeys { key -> !remoteList.any { it.md5 == key } }
+    val deleteFiles = arrayListOf<LocalFileAd>()
+    localFiles.filter { local -> !remoteList.any { local.fileName.contains(it.videoName) && it.md5 == it.md5 } }
         .forEach {
             //删除数据库 和文件
-            if (!it.value.isUsbPath) {
-                Logger.log("删除文件：" + it.value.filePath)
-                File(it.value.filePath).delete()
+            if (!it.isUsbPath) {
+                Logger.log("删除文件：" + it.filePath)
+                File(it.filePath).delete()
+                deleteFiles.add(it)
             }
         }
+    if(deleteFiles.isNotEmpty()){
+        localFiles.removeAll(deleteFiles)
+    }
 }
 
 /**
@@ -84,17 +87,24 @@ suspend fun deleteFiles(
  * 本地的 文件  copyFileName 到
  */
 suspend fun syncLocal2RemoteAndObtainUpdateList(
-    localFiles: HashMap<String, LocalFileAd>,
-    remoteList: List<AdInfo>
+    localFiles: List<LocalFileAd>,
+    remoteList: List<AdInfo>,
+    canPlayList: ArrayList<AdInfo>?
 ) =
     withContext(Dispatchers.IO) {
         val updateList = arrayListOf<AdInfo>()
         remoteList.forEach { remote ->
-            val find = localFiles[remote.md5]
+            //md5 和 名字都要对上 ，存在md5相同，名字不同的情况
+            val find =
+                localFiles.find { it.fileName.contains(remote.videoName) && it.md5 == remote.md5 }
             if (find == null) {
                 updateList.add(remote)
             } else {
                 remote.setData(find)
+                if (remote.id > 0) {
+                    //是否能播放
+                    canPlayList?.add(remote)
+                }
             }
         }
         Logger.log("updateList：$updateList")

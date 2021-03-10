@@ -9,7 +9,7 @@ import android.util.Log
  * @UpdateRemark:
  */
 object Logger {
-    val test = true
+    val test = false
     val tag = "TV_TV"
 
     fun log(msg: String) {

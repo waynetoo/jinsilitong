@@ -167,9 +167,12 @@ class InitActivity : BaseActivity<BinderPresenter>() {
             Glide.get(this@InitActivity).clearMemory()
 
             val localFiles = getLocalFiles()
-            val updateList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
             // 删除广告
             deleteFiles(localFiles, remoteList)
+
+            val canPlayList = arrayListOf<AdInfo>()
+            val updateList =
+                syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList, canPlayList)
 
             // 预加载的 播放列表
             Constants.playAdList = remoteList
@@ -182,12 +185,12 @@ class InitActivity : BaseActivity<BinderPresenter>() {
 //                scroller.fullScroll(View.FOCUS_DOWN);
 //            }
 
-
-            //播放的广告，本地一个也没有
-            if (remoteList.size != updateList.size) {
+            //需要展示的图片有没有下载
+            if (remoteList.size != updateList.size && canPlayList.isNotEmpty()) {
                 startActivity(Intent(this@InitActivity, MainActivity::class.java))
                 finish()
             } else {
+                //播放的广告，本地一个也没有
                 msg.text = "下载广告中。。。"
                 //更新列表
                 DownloadFiles({ task, cause ->

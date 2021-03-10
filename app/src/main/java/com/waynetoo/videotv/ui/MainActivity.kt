@@ -193,7 +193,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
         playAdList = Constants.playAdList
         Logger.log("initData->playAdList=> $playAdList")
 //        appendMsg("initData->playAdList=> $playAdList")
-        currentPlay = playAdList.first { !TextUtils.isEmpty(it.fileName) }
+        currentPlay = playAdList.first { !TextUtils.isEmpty(it.fileName) && it.id > 0 }
         play(currentPlay)
     }
 //
@@ -229,7 +229,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
             Constants.playAdList = remoteList
             val localFiles = getLocalFiles()
             //与播放列表对比  远程有 ，播放列表没有
-            downLoadList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList)
+            downLoadList = syncLocal2RemoteAndObtainUpdateList(localFiles, remoteList, null)
 
 //            appendMsg("需要下载的文件：downLoadList ：$downLoadList")
             if (downLoadList!!.isNotEmpty()) {
@@ -241,8 +241,9 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 handler.sendEmptyMessage(WHAT_DOWN_LOAD)
             } else {
                 //播放列表有,远程没有
+//                id=-1的时候，代表这个视频不属于播放列表，只下载到本地。。如果id=1，2，3。。代表这个视频加入播放列表，同时下载
                 val updatePlayList =
-                    playAdList.filterNot { play -> remoteList.any { it.md5 == play.md5 && it.id == play.id } }
+                    playAdList.filterNot { play -> remoteList.any { play.fileName.contains(it.videoName) && it.md5 == play.md5 && it.id == play.id } }
                 if (updatePlayList.isNotEmpty()) {
                     Logger.log("updateList$updatePlayList")
                     Logger.log("广告有删除 或者变更顺序")
@@ -410,7 +411,6 @@ class MainActivity : BaseActivity<MainPresenter>() {
     fun undateAd(view: View) {
         presenter.getAdList()
     }
-
     //
     fun appendMsg(mgs: String) {
 //        print_msg.append(mgs + "\n")
