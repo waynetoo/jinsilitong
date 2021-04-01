@@ -69,7 +69,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                         val insertAd =
                             playAdList.find { it.videoName == code && !TextUtils.isEmpty(it.fileName) }
                         if (insertAd == null) {
-                            toast("没有找到此条码的广告")
+                            toast("没有找到此条码的数据|$code|")
                         } else {
                             //插入广告
                             appendMsg("插入播放广告 =>" + insertAd.fileName)
@@ -308,6 +308,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
     override fun onDestroy() {
         super.onDestroy()
         OkDownload.with().downloadDispatcher().cancelAll()
+        handler.removeCallbacksAndMessages(null);
         stopService(mIntent)
 //        unregisterReceiver(usbBroadcastReceiver)
     }
@@ -434,7 +435,7 @@ class MainActivity : BaseActivity<MainPresenter>() {
                 return true
             } else {
                 finish()
-                exitProcess(0)
+//                exitProcess(0)
             }
         }
         return super.onKeyUp(keyCode, event)

@@ -48,7 +48,7 @@ class MyMqttService : Service() {
      */
     fun response(message: String) {
         val topic = RESPONSE_TOPIC
-        val qos = 2
+        val qos = QOS_VAL
         val retained = false
         try {
             //参数分别为：主题、消息的字节数组、服务质量、是否在服务器保留断开连接后的最后一条消息
@@ -86,7 +86,7 @@ class MyMqttService : Service() {
         var doConnect = true
         val message = "{\"terminal_uid\":\"$CLIENTID\"}"
         val topic = PUBLISH_TOPIC
-        val qos = 2
+        val qos = QOS_VAL
         val retained = false
         if (message != "" || topic != "") {
             // 最后的遗嘱
@@ -122,7 +122,7 @@ class MyMqttService : Service() {
                         iMqttActionListener
                     )
                 } catch (e: MqttException) {
-                    Log.i(TAG, "doClientConnection", e)
+                    Log.i(TAG, "doClientConnection fail", e)
                     e.printStackTrace()
                 }
             }
@@ -156,7 +156,7 @@ class MyMqttService : Service() {
             try {
                 mqttAndroidClient?.subscribe(
                     PUBLISH_TOPIC,
-                    2
+                    QOS_VAL
                 ) //订阅主题，参数：主题、服务质量
             } catch (e: MqttException) {
                 e.printStackTrace()
@@ -196,12 +196,14 @@ class MyMqttService : Service() {
     override fun onDestroy() {
         Logger.log("$TAG   onDestroy  " + mqttAndroidClient?.isConnected)
         super.onDestroy()
-        mqttAndroidClient?.unsubscribe(RESPONSE_TOPIC)
-        mqttAndroidClient?.unregisterResources()
-        mqttAndroidClient?.let {
-            if (it.isConnected) {
+
+        mqttAndroidClient?.run {
+            unsubscribe(RESPONSE_TOPIC)
+            unregisterResources()
+            Thread.sleep(200)
+            if (isConnected) {
                 try {
-                    it.disconnect() //断开连接
+                    disconnect() //断开连接
                 } catch (e: MqttException) {
                     Logger.log(TAG + "onDestroy  disconnect ")
                     e.printStackTrace()
@@ -219,6 +221,13 @@ class MyMqttService : Service() {
         const val LV_RECEIVE_MSG = "LV_RECEIVE_MSG" //响应主题
 
         /**
+         * QoS0，At most once，至多一次；
+        QoS1，At least once，至少一次；
+        QoS2，Exactly once，确保只有一次。
+         */
+        var QOS_VAL = 2; //
+
+        /**
          * 发布 （模拟其他客户端发布消息）
          *
          * @param message 消息
@@ -229,7 +238,7 @@ class MyMqttService : Service() {
             }
 
             val topic = PUBLISH_TOPIC
-            val qos = 2
+            val qos = QOS_VAL
             val retained = false
             try {
                 //参数分别为：主题、消息的字节数组、服务质量、是否在服务器保留断开连接后的最后一条消息

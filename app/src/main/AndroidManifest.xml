@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.waynetoo.videotv"
-    android:installLocation="internalOnly">
+    package="com.waynetoo.videotv">
 
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-feature
@@ -27,14 +26,15 @@
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <uses-feature
-        android:name="android.hardware.type.television"
-        android:required="true"></uses-feature>
+    <!--    <uses-feature-->
+    <!--        android:name="android.hardware.type.television"-->
+    <!--        android:required="true"></uses-feature>-->
     <application
         android:name=".app.Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
